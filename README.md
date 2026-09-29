@@ -15,12 +15,11 @@ Hecha con HTML, CSS y JavaScript (sin frameworks), PHP y MySQL.
 
 ## Cómo correrlo
 
-1. Crea la base de datos e impórtala:
+1. Crea la base de datos con sus tablas y datos iniciales (funciona en MySQL 8 y MariaDB):
 
    ```bash
    mysql -u root -p -e "CREATE DATABASE agenda CHARACTER SET utf8mb4"
-   mysql -u root -p agenda < bd/respaldo_agenda_antes.sql
-   mysql -u root -p agenda < bd/actualizar_agenda.sql
+   mysql -u root -p agenda < bd/instalar_agenda.sql
    ```
 
 2. Revisa el usuario, la contraseña y el nombre de la base en `conexion.php`.
@@ -42,6 +41,7 @@ Hecha con HTML, CSS y JavaScript (sin frameworks), PHP y MySQL.
 | `registros.php` | Devuelve los registros en JSON |
 | `guardar.php` | Valida y guarda el formulario (crear o actualizar) |
 | `eliminar.php` | Elimina un registro |
-| `bd/` | Respaldo de la base y script que agrega las columnas del formulario |
+| `bd/instalar_agenda.sql` | Crea las tablas y los datos iniciales |
+| `bd/respaldo_agenda_antes.sql`, `bd/actualizar_agenda.sql` | Base original y cómo se actualizó (historial) |
 | `css/styles.css` | Estilos (sistema de marca "Pulso Neón", modo claro/oscuro) |
 | `js/` | Calendario, formulario, lista "Próximos" y cambio de tema |
