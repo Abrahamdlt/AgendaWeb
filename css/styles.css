@@ -1,0 +1,924 @@
+/* =========================================
+   AgendaWeb · Brand "Pulso Neón"
+   ========================================= */
+
+:root {
+  /* Paleta */
+  --color-fondo: #0B0D12;
+  --color-superficie: #151923;
+  --color-texto: #E8ECF4;
+  --color-texto-secundario: #9AA4B8;
+  --color-acento: #00E5FF;
+  --color-borde: #2A3142;
+
+  /* Derivados */
+  --color-texto-sobre-acento: #0B0D12;
+  --color-borde-campo: #4A5570;          /* 3:1 para campos de formulario (WCAG) */
+  --color-superficie-2: #1C2130;          /* hover / campos */
+  --color-alerta: #FF5C8A;                /* prioridad alta */
+  --sombra-neon: 0 0 12px rgba(0, 229, 255, 0.35);
+
+  /* Liquid glass (solo transparencias de la paleta existente) */
+  --vidrio-superficie: rgba(21, 25, 35, 0.45);      /* --color-superficie */
+  --vidrio-superficie-2: rgba(28, 33, 48, 0.60);    /* --color-superficie-2 */
+  --vidrio-campo: rgba(11, 13, 18, 0.50);           /* --color-fondo */
+  --vidrio-borde: rgba(232, 236, 244, 0.14);        /* --color-texto */
+  --vidrio-borde-hover: rgba(232, 236, 244, 0.26);
+  --vidrio-desenfoque: blur(28px) saturate(180%);
+  --vidrio-reflejo: linear-gradient(155deg, rgba(232, 236, 244, 0.13) 0%, rgba(232, 236, 244, 0.02) 38%,
+                                            rgba(232, 236, 244, 0) 60%, rgba(232, 236, 244, 0.04) 100%);
+  --vidrio-brillo: inset 0 1px 0 rgba(232, 236, 244, 0.18), inset 0 -1px 0 rgba(232, 236, 244, 0.05),
+                   inset 1px 0 0 rgba(232, 236, 244, 0.05);
+  --vidrio-hundido: inset 0 2px 4px rgba(0, 0, 0, 0.40);
+  --sombra-vidrio: 0 16px 40px rgba(0, 0, 0, 0.45);
+  --acento-reflejo: linear-gradient(180deg, rgba(232, 236, 244, 0.40), rgba(232, 236, 244, 0) 55%);
+  --acento-brillo: inset 0 1px 0 rgba(232, 236, 244, 0.65), inset 0 -1px 0 rgba(11, 13, 18, 0.18);
+
+  /* Luces ambientales detrás del vidrio (neutras) */
+  --luz-1: rgba(154, 164, 184, 0.22);   /* --color-texto-secundario */
+  --luz-2: rgba(74, 85, 112, 0.45);     /* --color-borde-campo */
+  --luz-3: rgba(42, 49, 66, 0.80);      /* --color-borde */
+
+  /* Tipografía */
+  /* Serif editorial para títulos + grotesca moderna para interfaz (combinación tipo app de Claude) */
+  --fuente-titulos: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --fuente-cuerpo: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Forma y espacio */
+  --radio: 18px;
+  --radio-chico: 11px;
+  --radio-interno: calc(var(--radio-chico) - 3px);   /* concéntrico con el padding de 3px del selector */
+  --espacio: 1rem;
+  --transicion: 150ms ease;
+
+  /* Movimiento (estilo Apple) */
+  --curva-apple: cubic-bezier(0.32, 0.72, 0, 1);       /* desaceleración larga, sin rebote */
+  --curva-resorte: cubic-bezier(0.34, 1.3, 0.64, 1);   /* respaldo si no hay linear() */
+  --duracion-resorte: 550ms;
+  --duracion-entrada: 800ms;
+
+  color-scheme: dark;
+}
+
+/* Resorte real (amortiguado, ~8% de rebote) donde el navegador soporta linear() */
+@supports (transition-timing-function: linear(0, 1)) {
+  :root {
+    --curva-resorte: linear(0, 0.041, 0.143, 0.279, 0.428, 0.574, 0.706, 0.82, 0.911, 0.981,
+                            1.03, 1.061, 1.078, 1.083, 1.081, 1.073, 1.061, 1.049, 1.037, 1.026,
+                            1.016, 1.008, 1.002, 0.998, 0.995, 0.994, 0.993, 0.993, 0.994, 0.995,
+                            0.996, 0.997, 0.998, 0.999, 0.999, 1, 1);
+  }
+}
+
+/* ---------- Modo claro ---------- */
+/* Misma marca: el acento conserva el tono cian, oscurecido para cumplir AA sobre fondo claro */
+:root[data-tema="claro"] {
+  --color-fondo: #EEF1F6;
+  --color-superficie: #FFFFFF;
+  --color-texto: #0B0D12;                 /* 17.2:1 sobre fondo */
+  --color-texto-secundario: #4A5570;      /* 6.6:1 sobre fondo */
+  --color-acento: #006B7A;                /* 5.5:1 sobre fondo, 6.2:1 sobre blanco */
+  --color-borde: #D5DBE5;
+
+  --color-texto-sobre-acento: #FFFFFF;    /* 6.2:1 sobre acento */
+  --color-borde-campo: #7C879C;           /* 3.6:1 sobre blanco */
+  --color-superficie-2: #F4F6FA;
+  --color-alerta: #C81E54;                /* 4.9:1 sobre fondo */
+  --sombra-neon: 0 0 12px rgba(0, 107, 122, 0.35);
+
+  --vidrio-superficie: rgba(255, 255, 255, 0.50);
+  --vidrio-superficie-2: rgba(255, 255, 255, 0.72);
+  --vidrio-campo: rgba(255, 255, 255, 0.60);
+  --vidrio-borde: rgba(255, 255, 255, 0.75);
+  --vidrio-borde-hover: rgba(255, 255, 255, 1);
+  --vidrio-reflejo: linear-gradient(155deg, rgba(255, 255, 255, 0.70) 0%, rgba(255, 255, 255, 0.10) 38%,
+                                            rgba(255, 255, 255, 0) 60%, rgba(255, 255, 255, 0.25) 100%);
+  --vidrio-brillo: inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(11, 13, 18, 0.06),
+                   0 0 0 1px rgba(11, 13, 18, 0.04);
+  --vidrio-hundido: inset 0 2px 4px rgba(11, 13, 18, 0.08);
+  --sombra-vidrio: 0 16px 40px rgba(42, 49, 66, 0.14);
+  --acento-reflejo: linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 45%);
+  --acento-brillo: inset 0 1px 0 rgba(255, 255, 255, 0.40), inset 0 -1px 0 rgba(11, 13, 18, 0.20);
+
+  --luz-1: rgba(154, 164, 184, 0.45);
+  --luz-2: rgba(124, 135, 156, 0.40);
+  --luz-3: rgba(213, 219, 229, 0.90);
+
+  color-scheme: light;
+}
+
+/* ---------- Base ---------- */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--color-fondo);
+  color: var(--color-texto);
+  font-family: var(--fuente-cuerpo);
+  font-size: 1rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Luces ambientales neutras detrás del vidrio (sin cian: no es decoración accionable) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(45vw 40vw at 8% 10%, var(--luz-1), transparent 65%),
+    radial-gradient(50vw 45vw at 95% 88%, var(--luz-2), transparent 65%),
+    radial-gradient(35vw 30vw at 70% 18%, var(--luz-3), transparent 70%),
+    radial-gradient(30vw 30vw at 30% 80%, var(--luz-2), transparent 70%);
+}
+
+h1, h2, h3 {
+  font-family: var(--fuente-titulos);
+  letter-spacing: -0.015em;
+  margin: 0;
+  line-height: 1.2;
+}
+
+/* ---------- Barra superior ---------- */
+.barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio);
+  padding: 1rem clamp(1rem, 4vw, 2.5rem);
+  border-bottom: 1px solid var(--vidrio-borde);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--vidrio-superficie);
+  -webkit-backdrop-filter: var(--vidrio-desenfoque);
+  backdrop-filter: var(--vidrio-desenfoque);
+  box-shadow: var(--vidrio-brillo);
+}
+
+.marca {
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  font-size: 1.25rem;
+  color: var(--color-texto);
+  text-decoration: none;
+}
+.marca span { color: var(--color-acento); }
+
+.barra__nav { display: flex; gap: 1.25rem; margin-left: auto; }
+
+.enlace {
+  color: var(--color-texto-secundario);
+  text-decoration: none;
+  font-weight: 500;
+  padding-bottom: 2px;
+  border-bottom: 2px solid transparent;
+  transition: color var(--transicion), border-color var(--transicion);
+}
+.enlace:hover { color: var(--color-texto); }
+.enlace--activo {
+  color: var(--color-acento);
+  border-bottom-color: var(--color-acento);
+}
+
+/* ---------- Layout ---------- */
+.contenedor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 1.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem clamp(1rem, 4vw, 2.5rem);
+  align-items: start;
+}
+
+/* Páginas que necesitan más ancho (calendario) */
+.contenedor--ancho { max-width: 1320px; }
+
+/* ---------- Tarjetas ---------- */
+.tarjeta {
+  background: var(--vidrio-reflejo), var(--vidrio-superficie);
+  border: 1px solid var(--vidrio-borde);
+  border-radius: var(--radio);
+  padding: 1.25rem;
+  -webkit-backdrop-filter: var(--vidrio-desenfoque);
+  backdrop-filter: var(--vidrio-desenfoque);
+  box-shadow: var(--vidrio-brillo), var(--sombra-vidrio);
+}
+
+.tarjeta--principal {
+  padding: clamp(1.25rem, 3vw, 2rem);
+  border-top: 2px solid var(--color-acento);   /* el único "brillo" de la tarjeta */
+}
+
+.tarjeta--registro {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+  transition: border-color var(--transicion), background var(--transicion),
+              transform var(--duracion-resorte) var(--curva-resorte);
+}
+.tarjeta--registro:hover {
+  border-color: var(--vidrio-borde-hover);
+  background: var(--vidrio-reflejo), var(--vidrio-superficie-2);
+  transform: translateY(-3px);
+}
+.tarjeta--registro:active { transform: translateY(-1px) scale(0.985); }
+
+.tarjeta--vacia {
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--color-borde-campo);
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  text-align: center;
+  color: var(--color-texto-secundario);
+  font-size: 0.875rem;
+}
+.tarjeta--vacia p { margin: 0; }
+
+/* ---------- Títulos ---------- */
+.titulo { font-size: clamp(1.625rem, 3vw, 2rem); font-weight: 600; }
+.titulo--chico { font-size: 1.125rem; font-weight: 500; margin-bottom: 0.75rem; }
+
+.subtitulo {
+  margin: 0.375rem 0 1.75rem;
+  color: var(--color-texto-secundario);
+}
+
+/* ---------- Formulario ---------- */
+.formulario { display: grid; gap: 1.25rem; }
+
+.fila {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 1rem;
+}
+.fila--2 { grid-template-columns: 1fr 1fr; }
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.etiqueta {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-texto);
+  padding: 0;
+  margin-bottom: 0.375rem;
+}
+fieldset .etiqueta { margin-bottom: 0.5rem; }
+
+.opcional { font-weight: 400; color: var(--color-texto-secundario); }
+
+.entrada {
+  width: 100%;
+  font: inherit;
+  color: var(--color-texto);
+  background: var(--vidrio-campo);
+  border: 1px solid var(--color-borde-campo);
+  border-radius: var(--radio-chico);
+  box-shadow: var(--vidrio-hundido);
+  padding: 0.625rem 0.75rem;
+  transition: border-color var(--transicion), box-shadow var(--transicion);
+}
+.entrada::placeholder { color: var(--color-texto-secundario); opacity: 0.8; }
+.entrada:hover { border-color: var(--color-texto-secundario); }
+.entrada:focus {
+  outline: none;
+  border-color: var(--color-acento);
+  box-shadow: var(--sombra-neon);
+}
+.entrada--area { resize: vertical; min-height: 6rem; }
+
+select.entrada {
+  appearance: none;
+  padding-right: 2.25rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%239AA4B8' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.875rem center;
+}
+:root[data-tema="claro"] select.entrada {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%234A5570' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+
+/* Campo inválido tras interactuar, o rechazado por guardar.php */
+.entrada:user-invalid,
+.entrada[aria-invalid="true"] { border-color: var(--color-alerta); }
+
+.entrada:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Mensaje de error bajo un campo */
+.campo__error {
+  margin: 0.125rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--color-alerta);
+}
+
+/* Aviso tras enviar el formulario */
+.aviso {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.9375rem;
+  background: var(--vidrio-reflejo), var(--vidrio-superficie-2);
+  border: 1px solid var(--vidrio-borde-hover);
+  border-radius: var(--radio-chico);
+  box-shadow: var(--vidrio-brillo);
+  animation: aparecer 450ms var(--curva-apple);
+}
+.aviso[hidden] { display: none; }
+.aviso--error {
+  color: var(--color-alerta);
+  border-color: rgba(255, 92, 138, 0.4);
+}
+
+/* ---------- Selector segmentado (radios) ---------- */
+.selector {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  background: var(--vidrio-campo);
+  box-shadow: var(--vidrio-hundido);
+  border: 1px solid var(--color-borde-campo);
+  border-radius: var(--radio-chico);
+  padding: 3px;
+  gap: 3px;
+  max-width: 320px;
+  position: relative;
+}
+.selector--3 { grid-template-columns: repeat(3, 1fr); max-width: 420px; }
+
+.selector input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.selector label {
+  text-align: center;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radio-interno);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  color: var(--color-texto-secundario);
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+  outline: 2px solid transparent;
+  outline-offset: 6px;
+  transition: background var(--transicion), color 250ms var(--curva-apple),
+              outline-offset 400ms var(--curva-resorte), outline-color var(--transicion);
+}
+.selector input:not(:checked) + label:hover { color: var(--color-texto); background: var(--color-superficie-2); }
+.selector input:checked + label {
+  background: var(--acento-reflejo), var(--color-acento);
+  color: var(--color-texto-sobre-acento);
+  box-shadow: var(--acento-brillo), var(--sombra-neon);
+}
+.selector input:focus-visible + label {
+  outline-color: var(--color-acento);
+  outline-offset: 2px;
+}
+
+/* ---------- Casilla ---------- */
+.casilla {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  cursor: pointer;
+  width: fit-content;
+}
+.casilla input {
+  width: 1.125rem;
+  height: 1.125rem;
+  accent-color: var(--color-acento);
+  cursor: pointer;
+}
+
+/* ---------- Botones ---------- */
+.acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-borde);
+}
+
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;   /* también se usa en enlaces <a> */
+  font-family: var(--fuente-cuerpo);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  padding: 0.6875rem 1.25rem;
+  border-radius: var(--radio-chico);
+  border: 1px solid transparent;
+  cursor: pointer;
+  outline: 2px solid transparent;
+  outline-offset: 8px;
+  transition: background var(--transicion), box-shadow 250ms var(--curva-apple),
+              border-color var(--transicion), color var(--transicion),
+              transform var(--duracion-resorte) var(--curva-resorte),
+              outline-offset 400ms var(--curva-resorte), outline-color var(--transicion);
+}
+.boton:focus-visible {
+  outline-color: var(--color-acento);
+  outline-offset: 3px;
+}
+/* Al presionar se hunde rápido y regresa con resorte al soltar */
+.boton:active { transform: scale(0.96); transition-duration: 150ms, 250ms, 150ms, 150ms, 120ms, 400ms, 150ms; }
+
+.boton--primario {
+  background: var(--acento-reflejo), var(--color-acento);
+  color: var(--color-texto-sobre-acento);
+  box-shadow: var(--acento-brillo);
+}
+.boton--primario:hover { box-shadow: var(--acento-brillo), var(--sombra-neon); }
+
+.boton--secundario {
+  background: var(--vidrio-reflejo), rgba(232, 236, 244, 0.04);
+  color: var(--color-texto);
+  border-color: var(--color-borde-campo);
+  box-shadow: var(--vidrio-brillo);
+  -webkit-backdrop-filter: var(--vidrio-desenfoque);
+  backdrop-filter: var(--vidrio-desenfoque);
+}
+.boton--secundario:hover {
+  border-color: var(--color-texto-secundario);
+  background: var(--vidrio-reflejo), var(--vidrio-superficie-2);
+}
+
+/* Botón de solo ícono (cambio de tema) */
+.boton--icono {
+  display: inline-grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border-radius: 999px;
+  color: var(--color-texto);
+  background: var(--vidrio-reflejo), var(--vidrio-superficie);
+  border-color: var(--vidrio-borde);
+  box-shadow: var(--vidrio-brillo), var(--sombra-vidrio);
+  -webkit-backdrop-filter: var(--vidrio-desenfoque);
+  backdrop-filter: var(--vidrio-desenfoque);
+}
+.boton--icono:hover {
+  border-color: var(--vidrio-borde-hover);
+  background: var(--vidrio-reflejo), var(--vidrio-superficie-2);
+}
+.boton[hidden] { display: none; }
+.boton--icono svg {
+  grid-area: 1 / 1;
+  width: 1.25rem;
+  height: 1.25rem;
+  transition: transform 700ms var(--curva-resorte), opacity 300ms var(--curva-apple);
+}
+.boton--icono:active { transform: scale(0.9); }
+/* Luna y sol giran uno sobre otro al cambiar de tema */
+.boton--icono .icono-sol { opacity: 0; transform: rotate(-90deg) scale(0.4); }
+:root[data-tema="claro"] .boton--icono .icono-sol { opacity: 1; transform: none; }
+:root[data-tema="claro"] .boton--icono .icono-luna { opacity: 0; transform: rotate(90deg) scale(0.4); }
+
+/* ---------- Registro (tarjeta de lista) ---------- */
+.registro__hora {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 3rem;
+  padding: 0.375rem 0.5rem;
+  background: var(--vidrio-campo);
+  border: 1px solid var(--vidrio-borde);
+  border-radius: var(--radio-chico);
+  box-shadow: var(--vidrio-hundido);
+}
+.registro__dia {
+  font-family: var(--fuente-titulos);
+  font-size: 1.375rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--color-acento);
+}
+.registro__mes { font-size: 0.75rem; color: var(--color-texto-secundario); }
+
+.registro__info { min-width: 0; }
+.registro__titulo { font-size: 1rem; font-weight: 500; }
+.registro__meta {
+  margin: 0.25rem 0 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-texto-secundario);
+}
+
+/* ---------- Insignias ---------- */
+.insignia {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  color: var(--color-acento);
+  border: 1px solid rgba(0, 229, 255, 0.4);
+  background: rgba(0, 229, 255, 0.08);
+}
+.insignia--alta {
+  color: var(--color-alerta);
+  border-color: rgba(255, 92, 138, 0.4);
+  background: rgba(255, 92, 138, 0.08);
+}
+
+/* Botón a todo el ancho de su contenedor */
+.boton--bloque { width: 100%; }
+
+/* Botón pequeño (acciones dentro de una tarjeta) */
+.boton--chico { padding: 0.375rem 0.75rem; font-size: 0.8125rem; }
+
+/* Acción destructiva (eliminar): usa el color de alerta, nunca el cian */
+.boton--peligro {
+  background: transparent;
+  color: var(--color-alerta);
+  border-color: rgba(255, 92, 138, 0.45);
+}
+.boton--peligro:hover {
+  background: rgba(255, 92, 138, 0.1);
+  border-color: var(--color-alerta);
+}
+/* En el formulario, "Eliminar" se separa a la izquierda de Deshacer / Guardar */
+.acciones .boton--peligro { margin-right: auto; }
+
+/* ---------- Registro: acciones Editar / Eliminar ---------- */
+.registro__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+/* ---------- Diálogo de confirmación ---------- */
+.dialogo {
+  width: min(26rem, calc(100% - 2rem));
+  padding: 1.5rem;
+  color: var(--color-texto);
+  background: var(--vidrio-reflejo), var(--vidrio-superficie-2);
+  border: 1px solid var(--vidrio-borde-hover);
+  border-radius: var(--radio);
+  box-shadow: var(--vidrio-brillo), var(--sombra-vidrio);
+  -webkit-backdrop-filter: var(--vidrio-desenfoque);
+  backdrop-filter: var(--vidrio-desenfoque);
+}
+.dialogo::backdrop {
+  background: rgba(11, 13, 18, 0.45);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+.dialogo__titulo { font-size: 1.25rem; font-weight: 600; }
+.dialogo__texto { margin: 0.5rem 0 1.5rem; color: var(--color-texto-secundario); }
+.dialogo__acciones { display: flex; justify-content: flex-end; gap: 0.75rem; }
+
+/* ---------- Calendario (vista mensual) ---------- */
+.calendario { container: calendario / inline-size; }
+
+.calendario__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.calendario__controles { display: flex; align-items: center; gap: 0.5rem; }
+.calendario__controles .boton--secundario { padding: 0.5rem 1rem; }
+
+.calendario__semana,
+.calendario__dias {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+.calendario__semana {
+  margin-bottom: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-texto-secundario);
+}
+.calendario__semana span { padding: 0 0.5rem; }
+
+.calendario__leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-borde);
+  font-size: 0.8125rem;
+  color: var(--color-texto-secundario);
+}
+.calendario__leyenda > span { display: inline-flex; align-items: center; gap: 0.5rem; }
+
+/* Cada día es un botón */
+.dia {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+  min-width: 0;
+  min-height: 5.75rem;
+  padding: 0.375rem;
+  font: inherit;
+  text-align: left;
+  color: var(--color-texto);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radio-chico);
+  cursor: pointer;
+  outline: 2px solid transparent;
+  outline-offset: 6px;
+  transition: background var(--transicion), border-color var(--transicion),
+              transform var(--duracion-resorte) var(--curva-resorte),
+              outline-offset 400ms var(--curva-resorte), outline-color var(--transicion);
+}
+.dia:hover { background: var(--vidrio-superficie-2); border-color: var(--vidrio-borde); }
+.dia:active { transform: scale(0.95); transition-duration: 150ms, 150ms, 120ms, 400ms, 150ms; }
+.dia:focus-visible { outline-color: var(--color-acento); outline-offset: 1px; }
+.dia--fuera { color: var(--color-texto-secundario); }
+
+.dia__numero {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  transition: background 250ms var(--curva-apple), color 250ms var(--curva-apple),
+              transform var(--duracion-resorte) var(--curva-resorte);
+}
+/* Hoy: anillo neutro. El cian queda solo para la selección */
+.dia--hoy .dia__numero {
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1.5px var(--color-texto);
+}
+.dia[aria-pressed="true"] {
+  background: var(--vidrio-superficie-2);
+  border-color: var(--vidrio-borde-hover);
+}
+.dia[aria-pressed="true"] .dia__numero {
+  background: var(--acento-reflejo), var(--color-acento);
+  color: var(--color-texto-sobre-acento);
+  box-shadow: var(--acento-brillo), var(--sombra-neon);
+  font-weight: 600;
+  animation: rebote 450ms var(--curva-resorte);
+}
+
+/* Registros dentro de la celda (escritorio) */
+.dia__evento {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding: 1px 6px;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--color-texto);
+  background: var(--vidrio-campo);
+  border: 1px solid var(--vidrio-borde);
+  border-radius: var(--radio-interno);
+}
+.dia__evento--alta {
+  color: var(--color-alerta);
+  border-color: rgba(255, 92, 138, 0.4);
+}
+.dia__mas {
+  padding: 0 6px;
+  font-size: 0.75rem;
+  color: var(--color-texto-secundario);
+}
+
+/* Puntos (móvil y leyenda) */
+.dia__puntos { display: none; gap: 3px; justify-content: center; }
+.dia__punto {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-texto-secundario);
+}
+.dia__punto--alta { background: var(--color-alerta); }
+
+/* =========================================
+   Animaciones
+   ========================================= */
+
+/* ---------- Selector con píldora deslizante (como el segmented control de iOS) ---------- */
+@supports selector(:has(*)) {
+  .selector::before {
+    content: "";
+    position: absolute;
+    top: 3px;
+    bottom: 3px;
+    left: 3px;
+    width: calc((100% - 9px) / 2);
+    border-radius: var(--radio-interno);
+    background: var(--acento-reflejo), var(--color-acento);
+    box-shadow: var(--acento-brillo), var(--sombra-neon);
+    transition: transform var(--duracion-resorte) var(--curva-resorte),
+                scale 300ms var(--curva-apple);
+  }
+  .selector--3::before { width: calc((100% - 12px) / 3); }
+
+  .selector:has(input:nth-of-type(2):checked)::before { transform: translateX(calc(100% + 3px)); }
+  .selector:has(input:nth-of-type(3):checked)::before { transform: translateX(calc(200% + 6px)); }
+  .selector:not(:has(input:checked))::before { opacity: 0; }
+  .selector:active::before { scale: 0.96; }
+
+  /* La píldora reemplaza el fondo de la opción marcada */
+  .selector input:checked + label {
+    background: none;
+    box-shadow: none;
+  }
+}
+
+/* ---------- Entrada escalonada al cargar ---------- */
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+@keyframes bajar {
+  from { opacity: 0; transform: translateY(-100%); }
+}
+
+.barra { animation: bajar 700ms var(--curva-apple) backwards; }
+
+.tarjeta--principal { animation: aparecer var(--duracion-entrada) var(--curva-apple) 60ms backwards; }
+
+.tarjeta--principal > .titulo,
+.tarjeta--principal > .subtitulo,
+.formulario > *,
+.lateral > * {
+  animation: aparecer 700ms var(--curva-apple) backwards;
+  animation-delay: calc(var(--retraso-base, 140ms) + var(--orden, 0) * 45ms);
+}
+.lateral > * { --retraso-base: 260ms; }
+
+.tarjeta--principal > .subtitulo { --orden: 1; }
+.formulario > :nth-child(1) { --orden: 2; }
+.formulario > :nth-child(2) { --orden: 3; }
+.formulario > :nth-child(3) { --orden: 4; }
+.formulario > :nth-child(4) { --orden: 5; }
+.formulario > :nth-child(5) { --orden: 6; }
+.formulario > :nth-child(6) { --orden: 7; }
+.formulario > :nth-child(7) { --orden: 8; }
+.formulario > :nth-child(8) { --orden: 9; }
+.formulario > :nth-child(9) { --orden: 10; }
+.formulario > :nth-child(10) { --orden: 11; }
+.formulario > :nth-child(11) { --orden: 12; }
+
+/* Diálogo: aparece con un pequeño resorte, como las alertas de iOS */
+@keyframes dialogo-entrar {
+  from { opacity: 0; transform: scale(0.94); }
+}
+.dialogo[open] { animation: dialogo-entrar 380ms var(--curva-resorte); }
+
+/* El aviso aparece cuando responde guardar.php: sin el retraso de la entrada de la página */
+.formulario > .aviso { animation: aparecer 450ms var(--curva-apple); }
+.lateral > :nth-child(2) { --orden: 1; }
+.lateral > :nth-child(3) { --orden: 2; }
+.lateral > :nth-child(4) { --orden: 3; }
+.lateral > :nth-child(5) { --orden: 4; }
+
+/* ---------- Casilla: pequeño rebote al marcar ---------- */
+@keyframes rebote {
+  from { scale: 0.6; }
+  to { scale: 1; }
+}
+.casilla input:checked { animation: rebote 450ms var(--curva-resorte); }
+
+/* ---------- Calendario: el mes entra deslizándose en la dirección del cambio ---------- */
+@keyframes mes-siguiente {
+  from { opacity: 0; transform: translateX(32px); filter: blur(4px); }
+}
+@keyframes mes-anterior {
+  from { opacity: 0; transform: translateX(-32px); filter: blur(4px); }
+}
+.calendario__dias--siguiente { animation: mes-siguiente 480ms var(--curva-apple); }
+.calendario__dias--anterior { animation: mes-anterior 480ms var(--curva-apple); }
+
+/* Registros del día seleccionado: aparecen escalonados */
+.lista-registros > * {
+  animation: aparecer 450ms var(--curva-apple) backwards;
+  animation-delay: calc(var(--orden, 0) * 50ms);
+}
+
+/* ---------- Barra: se vuelve más sólida al hacer scroll ---------- */
+@keyframes compactar {
+  to {
+    background: var(--vidrio-superficie-2);
+    box-shadow: var(--vidrio-brillo), var(--sombra-vidrio);
+  }
+}
+@supports (animation-timeline: scroll()) {
+  .barra {
+    animation: bajar 700ms var(--curva-apple) backwards, compactar linear both;
+    animation-timeline: auto, scroll();
+    animation-range: normal, 0 120px;
+  }
+}
+
+/* ---------- Cambio de tema: revelado circular (View Transitions) ---------- */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 860px) {
+  .contenedor { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 560px) {
+  .fila,
+  .fila--2 { grid-template-columns: 1fr; }
+  .barra__nav { gap: 0.875rem; font-size: 0.875rem; }
+  .acciones { flex-direction: column-reverse; }
+  .acciones .boton { width: 100%; }
+  .selector, .selector--3 { max-width: none; }
+}
+
+/* Calendario compacto (número + puntos) cuando las celdas no caben con títulos.
+   Depende del ancho real del calendario, no de la ventana. */
+@container calendario (max-width: 640px) {
+  .calendario__semana,
+  .calendario__dias { gap: 2px; }
+  .calendario__semana span { padding: 0; text-align: center; }
+  .dia {
+    align-items: center;
+    min-height: 3.25rem;
+    padding: 0.25rem 0;
+  }
+  .dia__evento,
+  .dia__mas { display: none; }
+  .dia__puntos { display: flex; }
+}
+
+/* ---------- Movimiento reducido ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+  .tarjeta--registro:hover,
+  .tarjeta--registro:active { transform: none; }
+}
+
+/* ---------- Sin vidrio: transparencia reducida o navegador sin soporte ---------- */
+@media (prefers-reduced-transparency: reduce) {
+  :root,
+  :root[data-tema="claro"] {
+    --vidrio-superficie: var(--color-superficie);
+    --vidrio-superficie-2: var(--color-superficie-2);
+    --vidrio-campo: var(--color-fondo);
+    --vidrio-desenfoque: none;
+  }
+  body::before { display: none; }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root,
+  :root[data-tema="claro"] {
+    --vidrio-superficie: var(--color-superficie);
+    --vidrio-superficie-2: var(--color-superficie-2);
+    --vidrio-campo: var(--color-fondo);
+  }
+}
