@@ -22,7 +22,8 @@ Hecha con HTML, CSS y JavaScript (sin frameworks), PHP y MySQL.
    mysql -u root -p agenda < bd/instalar_agenda.sql
    ```
 
-2. Revisa el usuario, la contraseña y el nombre de la base en `conexion.php`.
+2. Copia `conexion.ejemplo.php` como `conexion.php` y pon tu usuario, contraseña y nombre
+   de la base. `conexion.php` está en `.gitignore`: los datos de acceso nunca se suben a GitHub.
 
 3. Desde la carpeta del proyecto, levanta el servidor de PHP y abre http://localhost:8080
 
@@ -36,7 +37,7 @@ Hecha con HTML, CSS y JavaScript (sin frameworks), PHP y MySQL.
 |---|---|
 | `index.html` | Formulario para crear o editar un registro (`index.html?editar=ID`) y lista "Próximos" |
 | `calendario.html` | Vista mensual con los registros de cada día |
-| `conexion.php` | Conexión a MySQL |
+| `conexion.ejemplo.php` | Plantilla de `conexion.php` (conexión a MySQL, sin datos reales) |
 | `datos.php` | Consultas a la base (leer, guardar, actualizar, eliminar) |
 | `registros.php` | Devuelve los registros en JSON |
 | `guardar.php` | Valida y guarda el formulario (crear o actualizar) |

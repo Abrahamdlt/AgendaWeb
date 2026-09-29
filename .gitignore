@@ -1,2 +1,5 @@
+# Datos de acceso a la base: nunca se suben (usa conexion.ejemplo.php como plantilla)
+conexion.php
+
 # Configuración local del editor / asistente
 .claude/
