@@ -316,7 +316,7 @@ select.entrada {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%234A5570' stroke-width='1.5'/%3E%3C/svg%3E");
 }
 
-/* Campo inválido tras interactuar, o rechazado por guardar.php */
+/* Campo inválido tras interactuar, o rechazado por la validación del servidor */
 .entrada:user-invalid,
 .entrada[aria-invalid="true"] { border-color: var(--color-alerta); }
 
@@ -332,8 +332,9 @@ select.entrada {
   color: var(--color-alerta);
 }
 
-/* Aviso tras enviar el formulario */
+/* Aviso tras enviar el formulario (éxito después de la redirección, o errores) */
 .aviso {
+  margin-bottom: 1.5rem;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -807,9 +808,6 @@ select.entrada {
   from { opacity: 0; transform: scale(0.94); }
 }
 .dialogo[open] { animation: dialogo-entrar 380ms var(--curva-resorte); }
-
-/* El aviso aparece cuando responde guardar.php: sin el retraso de la entrada de la página */
-.formulario > .aviso { animation: aparecer 450ms var(--curva-apple); }
 .lateral > :nth-child(2) { --orden: 1; }
 .lateral > :nth-child(3) { --orden: 2; }
 .lateral > :nth-child(4) { --orden: 3; }

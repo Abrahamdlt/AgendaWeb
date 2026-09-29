@@ -3,16 +3,22 @@
 // AgendaWeb · Capa de datos
 // =========================================
 // Es el único archivo que habla con MySQL (tablas "eventos" y "categoria",
-// ver bd/actualizar_agenda.sql). guardar.php, registros.php y eliminar.php solo
+// ver bd/instalar_agenda.sql). index.php, registros.php y eliminar.php solo
 // llaman a estas funciones.
 require __DIR__ . '/conexion.php';
 
-// Si una consulta falla, se responde un JSON de error en lugar de romper la página
+// Si una consulta falla, se responde un mensaje de error en lugar de romper la página
+// (en JSON cuando lo pidió el JavaScript, en texto cuando es una página)
 set_exception_handler(function (Throwable $e): void {
     error_log('AgendaWeb: ' . $e->getMessage());
     http_response_code(500);
-    header('Content-Type: application/json; charset=utf-8');
-    echo json_encode(['ok' => false, 'error' => 'Ocurrió un error con la base de datos.']);
+    if (str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json')) {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['ok' => false, 'error' => 'Ocurrió un error con la base de datos.']);
+    } else {
+        header('Content-Type: text/plain; charset=utf-8');
+        echo 'Ocurrió un error con la base de datos.';
+    }
 });
 
 // Consulta base. La categoría se devuelve con su clave (escuela, trabajo, salud, personal)

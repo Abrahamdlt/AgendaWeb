@@ -18,11 +18,6 @@ var Registros = (function () {
     return pedirJson("registros.php");
   }
 
-  // Un registro por su id (para editarlo)
-  function obtener(id) {
-    return pedirJson("registros.php?id=" + encodeURIComponent(id));
-  }
-
   function eliminar(id) {
     var datos = new FormData();
     datos.append("id", id);
@@ -133,7 +128,7 @@ var Registros = (function () {
       var acciones = crear("div", "registro__acciones");
 
       var editar = crear("a", "boton boton--secundario boton--chico", "Editar");
-      editar.href = "index.html?editar=" + r.id;
+      editar.href = "index.php?editar=" + r.id;
       editar.setAttribute("aria-label", "Editar «" + r.titulo + "»");
 
       var borrar = crear("button", "boton boton--peligro boton--chico", "Eliminar");
@@ -196,7 +191,6 @@ var Registros = (function () {
 
   return {
     cargar: cargar,
-    obtener: obtener,
     confirmarYEliminar: confirmarYEliminar,
     clave: clave,
     desdeClave: desdeClave,

@@ -127,7 +127,7 @@
     var nombre = DIAS_SEMANA[seleccionado.getDay()] + ", " + seleccionado.getDate() +
                  " de " + MESES[seleccionado.getMonth()];
     detalleTitulo.textContent = capitalizar(nombre);
-    detalleAgregar.href = "index.html?fecha=" + clave(seleccionado);
+    detalleAgregar.href = "index.php?fecha=" + clave(seleccionado);
 
     if (estado === "cargando") {
       detalleLista.replaceChildren(Registros.crearVacia("Cargando registros…"));

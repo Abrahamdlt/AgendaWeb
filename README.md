@@ -35,12 +35,12 @@ Hecha con HTML, CSS y JavaScript (sin frameworks), PHP y MySQL.
 
 | Archivo | Qué hace |
 |---|---|
-| `index.html` | Formulario para crear o editar un registro (`index.html?editar=ID`) y lista "Próximos" |
-| `calendario.html` | Vista mensual con los registros de cada día |
+| `index.php` | Formulario para crear o editar un registro (`index.php?editar=ID`) y lista "Próximos". Valida en el servidor, vuelve a mostrar lo escrito si hay errores y usa PRG (redirige a `index.php?ok=...` con el mensaje de éxito) |
+| `validacion.php` | Campos obligatorios, formatos y listas blancas del formulario |
+| `datos.php` | Consultas preparadas a la base (leer, guardar, actualizar, eliminar) |
 | `conexion.ejemplo.php` | Plantilla de `conexion.php` (conexión a MySQL, sin datos reales) |
-| `datos.php` | Consultas a la base (leer, guardar, actualizar, eliminar) |
-| `registros.php` | Devuelve los registros en JSON |
-| `guardar.php` | Valida y guarda el formulario (crear o actualizar) |
+| `calendario.html` | Vista mensual con los registros de cada día |
+| `registros.php` | Devuelve los registros en JSON (calendario y "Próximos") |
 | `eliminar.php` | Elimina un registro |
 | `bd/instalar_agenda.sql` | Crea las tablas y los datos iniciales |
 | `bd/respaldo_agenda_antes.sql`, `bd/actualizar_agenda.sql` | Base original y cómo se actualizó (historial) |
