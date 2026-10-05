@@ -1,129 +1,32 @@
 <?php
 // =========================================
-// AgendaWeb · Formulario de registro
+// AgendaWeb · Eventos (página principal)
 // =========================================
-// Crear:  index.php            Editar: index.php?editar=ID
-//
-// Patrón PRG (Post / Redirect / Get):
-//   1. El formulario se envía a esta misma página con POST.
-//   2. Se valida en el servidor (validacion.php).
-//      - Con errores: se vuelve a mostrar el formulario con lo que escribió la persona
-//        (formulario "pegajoso") y un mensaje junto a cada campo.
-//      - Sin errores: se guarda con consulta preparada (datos.php) y se REDIRIGE a
-//        index.php?ok=... para que recargar la página no vuelva a enviar el formulario.
-//   3. La redirección llega por GET y muestra el mensaje de éxito.
+// Lista los eventos pendientes (los pinta js/eventos.js desde registros.php).
+// También es el destino de la redirección PRG de registrar.php:
+//   index.php?ok=creado&id=5      index.php?ok=actualizado&id=5      index.php?ok=eliminado
+// y muestra el mensaje de éxito correspondiente.
 require __DIR__ . '/datos.php';
-require __DIR__ . '/validacion.php';
+require __DIR__ . '/ayudas.php';
 
-$valores = VALORES_INICIALES;
-$errores = [];
-$aviso = null;   // ['texto' => ..., 'error' => bool, 'enlace' => ['texto' => ..., 'href' => ...]]
+$aviso = null;   // ['texto' => ..., 'enlace' => ['texto' => ..., 'href' => ...]]
+$ok = $_GET['ok'] ?? '';
 
-// Un número entero que viene en la URL (?editar=5), o null
-function numero_de_url(string $nombre): ?int
-{
-    $valor = $_GET[$nombre] ?? null;
-    return is_string($valor) && ctype_digit($valor) ? (int) $valor : null;
-}
-
-function enlace_al_calendario(string $fecha): array
-{
-    return ['texto' => 'Ver en el calendario', 'href' => 'calendario.html?fecha=' . $fecha];
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // ---------- 1-2. Recibir y validar ----------
-    $valores = leer_formulario($_POST);
-    [$datos, $errores] = validar_registro($valores);
-
-    if (!$errores && $valores['id'] === '') {
-        $registro = guardar_registro($datos);
-        header('Location: index.php?ok=creado&id=' . $registro['id'], true, 303);   // Redirect
-        exit;
-    }
-    if (!$errores) {
-        $registro = actualizar_registro((int) $valores['id'], $datos);
-        if ($registro !== null) {
-            header('Location: index.php?editar=' . $registro['id'] . '&ok=actualizado', true, 303);
-            exit;
-        }
-        $aviso = ['texto' => 'Ese registro ya no existe; puede que se haya eliminado.', 'error' => true,
-                  'enlace' => ['texto' => 'Ir al calendario', 'href' => 'calendario.html']];
+if ($ok === 'creado' || $ok === 'actualizado') {
+    $id = numero_de_url('id');
+    $registro = $id !== null ? obtener_registro($id) : null;
+    if ($registro !== null) {
+        $aviso = [
+            'texto' => $ok === 'creado'
+                ? 'Se guardó «' . $registro['titulo'] . '».'
+                : 'Se guardaron los cambios de «' . $registro['titulo'] . '».',
+            'enlace' => ['texto' => 'Ver en el calendario', 'href' => 'calendario.html?fecha=' . $registro['fecha']],
+        ];
     } else {
-        $aviso = ['texto' => 'Revisa los campos marcados.', 'error' => true];
+        $aviso = ['texto' => $ok === 'creado' ? 'Se guardó el registro.' : 'Se guardaron los cambios.'];
     }
-} else {
-    // ---------- 3. Página pedida por GET ----------
-    $id_editar = numero_de_url('editar');
-    if ($id_editar !== null) {
-        $registro = obtener_registro($id_editar);
-        if ($registro !== null) {
-            $valores = registro_a_valores($registro);
-        } else {
-            $aviso = ['texto' => 'No se encontró ese registro; puede que ya se haya eliminado.', 'error' => true,
-                      'enlace' => ['texto' => 'Ir al calendario', 'href' => 'calendario.html']];
-        }
-    } elseif (es_fecha((string) ($_GET['fecha'] ?? ''))) {
-        $valores['fecha'] = $_GET['fecha'];   // viene de "Agregar registro este día" del calendario
-    }
-
-    // Mensaje de éxito después de la redirección
-    $ok = $_GET['ok'] ?? '';
-    if ($ok === 'creado') {
-        $id = numero_de_url('id');
-        $guardado = $id !== null ? obtener_registro($id) : null;
-        $aviso = $guardado
-            ? ['texto' => 'Se guardó «' . $guardado['titulo'] . '».', 'error' => false,
-               'enlace' => enlace_al_calendario($guardado['fecha'])]
-            : ['texto' => 'Se guardó el registro.', 'error' => false];
-    } elseif ($ok === 'actualizado' && $valores['id'] !== '') {
-        $aviso = ['texto' => 'Se guardaron los cambios de «' . $valores['titulo'] . '».', 'error' => false,
-                  'enlace' => enlace_al_calendario($valores['fecha'])];
-    }
-}
-
-$editando = $valores['id'] !== '';
-
-// El primer campo con error en el orden del formulario: ahí se pone el cursor
-$primer_error = null;
-foreach (array_keys(VALORES_INICIALES) as $campo) {
-    if (isset($errores[$campo])) {
-        $primer_error = $campo;
-        break;
-    }
-}
-
-// ---------- Ayudas para escribir el HTML ----------
-// Escapa texto para mostrarlo en HTML sin riesgo (evita que se inyecte código)
-function e($texto): string
-{
-    return htmlspecialchars((string) $texto, ENT_QUOTES, 'UTF-8');
-}
-
-// Atributos de un campo con error: lo marcan como inválido, lo enlazan a su mensaje
-// y ponen el cursor en el primer campo con error
-function atributos_error(string $campo): string
-{
-    global $errores, $primer_error;
-    if (!isset($errores[$campo])) {
-        return '';
-    }
-    $atributos = ' aria-invalid="true" aria-describedby="error-' . $campo . '"';
-    return $campo === $primer_error ? $atributos . ' autofocus' : $atributos;
-}
-
-function mensaje_error(string $campo): string
-{
-    global $errores;
-    if (!isset($errores[$campo])) {
-        return '';
-    }
-    return '<p class="campo__error" id="error-' . $campo . '">' . e($errores[$campo]) . '</p>';
-}
-
-function marcado(bool $condicion, string $atributo): string
-{
-    return $condicion ? ' ' . $atributo : '';
+} elseif ($ok === 'eliminado') {
+    $aviso = ['texto' => 'Se eliminó el registro.'];
 }
 ?>
 <!DOCTYPE html>
@@ -131,7 +34,7 @@ function marcado(bool $condicion, string $atributo): string
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AgendaWeb · <?= $editando ? 'Editar registro' : 'Nuevo registro' ?></title>
+  <title>AgendaWeb · Eventos</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -150,16 +53,16 @@ function marcado(bool $condicion, string $atributo): string
   </script>
   <script src="js/tema.js" defer></script>
   <script src="js/registros.js" defer></script>
-  <script src="js/proximos.js" defer></script>
-  <script src="js/nuevo-registro.js" defer></script>
+  <script src="js/eventos.js" defer></script>
 </head>
 <body>
 
   <header class="barra">
     <a href="index.php" class="marca">Agenda<span>Web</span></a>
     <nav class="barra__nav">
+      <a href="index.php" class="enlace enlace--activo" aria-current="page">Eventos</a>
       <a href="calendario.html" class="enlace">Calendario</a>
-      <a href="index.php" class="enlace enlace--activo" aria-current="page">Nuevo registro</a>
+      <a href="registrar.php" class="enlace">Nuevo registro</a>
     </nav>
     <button type="button" class="boton boton--icono" id="boton-tema"
             aria-label="Cambiar a modo claro" hidden>
@@ -175,18 +78,20 @@ function marcado(bool $condicion, string $atributo): string
     </button>
   </header>
 
-  <main class="contenedor">
+  <main class="contenedor contenedor--sencillo">
 
-    <!-- Formulario principal -->
-    <section class="tarjeta tarjeta--principal">
-      <h1 class="titulo"><?= $editando ? 'Editar registro' : 'Nuevo registro' ?></h1>
-      <p class="subtitulo">
-        <?= $editando ? 'Cambia lo que necesites y guarda los cambios.' : 'Agrega un evento o una cita a tu agenda.' ?>
-      </p>
+    <section class="eventos" aria-labelledby="eventos-titulo">
+      <div class="eventos__cabecera">
+        <div>
+          <h1 class="titulo" id="eventos-titulo">Eventos</h1>
+          <p class="subtitulo" id="eventos-resumen" tabindex="-1">Tus eventos y citas pendientes.</p>
+        </div>
+        <a class="boton boton--primario" href="registrar.php">Nuevo registro</a>
+      </div>
 
       <?php if ($aviso): ?>
-        <!-- Mensaje de éxito (después de la redirección) o de error -->
-        <div class="aviso<?= $aviso['error'] ? ' aviso--error' : '' ?>" role="<?= $aviso['error'] ? 'alert' : 'status' ?>">
+        <!-- Mensaje de éxito después de la redirección (patrón PRG) -->
+        <div class="aviso" role="status">
           <span><?= e($aviso['texto']) ?></span>
           <?php if (!empty($aviso['enlace'])): ?>
             <a class="enlace enlace--activo" href="<?= e($aviso['enlace']['href']) ?>"><?= e($aviso['enlace']['texto']) ?></a>
@@ -194,142 +99,11 @@ function marcado(bool $condicion, string $atributo): string
         </div>
       <?php endif; ?>
 
-      <form class="formulario" id="formulario-registro" action="index.php" method="post">
-
-        <!-- Vacío = registro nuevo; con número = se está editando ese registro -->
-        <input type="hidden" name="id" value="<?= e($valores['id']) ?>">
-
-        <!-- Tipo de registro -->
-        <fieldset class="campo">
-          <legend class="etiqueta">Tipo</legend>
-          <div class="selector">
-            <?php foreach (TIPOS as $valor => $texto): ?>
-              <input type="radio" id="tipo-<?= e($valor) ?>" name="tipo" value="<?= e($valor) ?>"<?= marcado($valores['tipo'] === $valor, 'checked') ?><?= marcado($primer_error === 'tipo' && $valor === array_key_first(TIPOS), 'autofocus') ?>>
-              <label for="tipo-<?= e($valor) ?>"><?= e($texto) ?></label>
-            <?php endforeach; ?>
-          </div>
-          <?= mensaje_error('tipo') ?>
-        </fieldset>
-
-        <!-- Título -->
-        <div class="campo">
-          <label class="etiqueta" for="titulo">Título</label>
-          <input class="entrada" type="text" id="titulo" name="titulo" value="<?= e($valores['titulo']) ?>"
-                 placeholder="Ej. Revisión del proyecto final" required maxlength="80"<?= atributos_error('titulo') ?>>
-          <?= mensaje_error('titulo') ?>
-        </div>
-
-        <!-- Fecha y horas -->
-        <div class="fila">
-          <div class="campo">
-            <label class="etiqueta" for="fecha">Fecha</label>
-            <input class="entrada" type="date" id="fecha" name="fecha" value="<?= e($valores['fecha']) ?>"
-                   required<?= atributos_error('fecha') ?>>
-            <?= mensaje_error('fecha') ?>
-          </div>
-          <div class="campo">
-            <label class="etiqueta" for="hora-inicio">Inicio</label>
-            <input class="entrada" type="time" id="hora-inicio" name="hora_inicio" value="<?= e($valores['hora_inicio']) ?>"
-                   <?= $valores['todo_el_dia'] ? 'disabled' : 'required' ?><?= atributos_error('hora_inicio') ?>>
-            <?= mensaje_error('hora_inicio') ?>
-          </div>
-          <div class="campo">
-            <label class="etiqueta" for="hora-fin">Fin</label>
-            <input class="entrada" type="time" id="hora-fin" name="hora_fin" value="<?= e($valores['hora_fin']) ?>"
-                   <?= marcado($valores['todo_el_dia'], 'disabled') ?><?= atributos_error('hora_fin') ?>>
-            <?= mensaje_error('hora_fin') ?>
-          </div>
-        </div>
-
-        <!-- Lugar y con quién -->
-        <div class="fila fila--2">
-          <div class="campo">
-            <label class="etiqueta" for="lugar">Lugar</label>
-            <input class="entrada" type="text" id="lugar" name="lugar" value="<?= e($valores['lugar']) ?>"
-                   placeholder="Sala B, Zoom, consultorio…" maxlength="120"<?= atributos_error('lugar') ?>>
-            <?= mensaje_error('lugar') ?>
-          </div>
-          <div class="campo">
-            <label class="etiqueta" for="persona">Con quién <span class="opcional">(opcional)</span></label>
-            <input class="entrada" type="text" id="persona" name="persona" value="<?= e($valores['persona']) ?>"
-                   placeholder="Nombre de la persona" maxlength="80"<?= atributos_error('persona') ?>>
-            <?= mensaje_error('persona') ?>
-          </div>
-        </div>
-
-        <!-- Categoría y recordatorio -->
-        <div class="fila fila--2">
-          <div class="campo">
-            <label class="etiqueta" for="categoria">Categoría</label>
-            <select class="entrada" id="categoria" name="categoria"<?= atributos_error('categoria') ?>>
-              <?php foreach (CATEGORIAS as $valor => $texto): ?>
-                <option value="<?= e($valor) ?>"<?= marcado($valores['categoria'] === (string) $valor, 'selected') ?>><?= e($texto) ?></option>
-              <?php endforeach; ?>
-            </select>
-            <?= mensaje_error('categoria') ?>
-          </div>
-          <div class="campo">
-            <label class="etiqueta" for="recordatorio">Recordatorio</label>
-            <select class="entrada" id="recordatorio" name="recordatorio"<?= atributos_error('recordatorio') ?>>
-              <?php foreach (RECORDATORIOS as $valor => $texto): ?>
-                <option value="<?= e($valor) ?>"<?= marcado($valores['recordatorio'] === (string) $valor, 'selected') ?>><?= e($texto) ?></option>
-              <?php endforeach; ?>
-            </select>
-            <?= mensaje_error('recordatorio') ?>
-          </div>
-        </div>
-
-        <!-- Prioridad -->
-        <fieldset class="campo">
-          <legend class="etiqueta">Prioridad</legend>
-          <div class="selector selector--3">
-            <?php foreach (PRIORIDADES as $valor => $texto): ?>
-              <input type="radio" id="prio-<?= e($valor) ?>" name="prioridad" value="<?= e($valor) ?>"<?= marcado($valores['prioridad'] === $valor, 'checked') ?><?= marcado($primer_error === 'prioridad' && $valor === array_key_first(PRIORIDADES), 'autofocus') ?>>
-              <label for="prio-<?= e($valor) ?>"><?= e($texto) ?></label>
-            <?php endforeach; ?>
-          </div>
-          <?= mensaje_error('prioridad') ?>
-        </fieldset>
-
-        <!-- Notas -->
-        <div class="campo">
-          <label class="etiqueta" for="notas">Notas</label>
-          <textarea class="entrada entrada--area" id="notas" name="notas" rows="4"
-                    placeholder="Detalles, materiales que llevar, enlaces…" maxlength="1000"<?= atributos_error('notas') ?>><?= e($valores['notas']) ?></textarea>
-          <?= mensaje_error('notas') ?>
-        </div>
-
-        <!-- Casilla -->
-        <label class="casilla">
-          <input type="checkbox" id="todo-el-dia" name="todo_el_dia"<?= marcado($valores['todo_el_dia'], 'checked') ?>>
-          <span>Todo el día</span>
-        </label>
-
-        <!-- Acciones -->
-        <div class="acciones">
-          <?php if ($editando): ?>
-            <button type="button" class="boton boton--peligro" id="boton-eliminar"
-                    data-id="<?= e($valores['id']) ?>" data-titulo="<?= e($valores['titulo']) ?>"
-                    data-fecha="<?= e($valores['fecha']) ?>">Eliminar</button>
-            <a class="boton boton--secundario" href="index.php?editar=<?= e($valores['id']) ?>">Deshacer cambios</a>
-            <button type="submit" class="boton boton--primario">Guardar cambios</button>
-          <?php else: ?>
-            <a class="boton boton--secundario" href="index.php">Limpiar</a>
-            <button type="submit" class="boton boton--primario">Guardar registro</button>
-          <?php endif; ?>
-        </div>
-
-      </form>
-    </section>
-
-    <!-- Próximos registros (los carga js/proximos.js desde registros.php) -->
-    <aside class="lateral">
-      <h2 class="titulo titulo--chico">Próximos</h2>
-      <div class="lista-registros" id="proximos-lista">
-        <div class="tarjeta tarjeta--vacia"><p>Cargando registros…</p></div>
+      <!-- Pendientes agrupados por día (los pinta js/eventos.js) -->
+      <div class="eventos__lista" id="eventos-lista">
+        <div class="tarjeta tarjeta--vacia"><p>Cargando eventos…</p></div>
       </div>
-      <a class="enlace" href="calendario.html">Ver todo en el calendario</a>
-    </aside>
+    </section>
 
   </main>
 

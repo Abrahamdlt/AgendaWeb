@@ -35,11 +35,13 @@ Hecha con HTML, CSS y JavaScript (sin frameworks), PHP y MySQL.
 
 | Archivo | Qué hace |
 |---|---|
-| `index.php` | Formulario para crear o editar un registro (`index.php?editar=ID`) y lista "Próximos". Valida en el servidor, vuelve a mostrar lo escrito si hay errores y usa PRG (redirige a `index.php?ok=...` con el mensaje de éxito) |
+| `index.php` | Página principal **Eventos**: todos los pendientes agrupados por día. Muestra el mensaje de éxito tras guardar, editar o eliminar (`index.php?ok=...`) |
+| `registrar.php` | Formulario para crear o editar un registro (`registrar.php?editar=ID`) y lista "Próximos". Valida en el servidor, vuelve a mostrar lo escrito si hay errores y usa PRG (redirige a `index.php?ok=...`) |
 | `validacion.php` | Campos obligatorios, formatos y listas blancas del formulario |
+| `ayudas.php` | Funciones pequeñas que comparten las páginas PHP |
 | `datos.php` | Consultas preparadas a la base (leer, guardar, actualizar, eliminar) |
 | `conexion.ejemplo.php` | Plantilla de `conexion.php` (conexión a MySQL, sin datos reales) |
-| `calendario.html` | Vista mensual con los registros de cada día |
+| `calendario.html` | Vista mensual, registros del día seleccionado y el evento más cercano |
 | `registros.php` | Devuelve los registros en JSON (calendario y "Próximos") |
 | `eliminar.php` | Elimina un registro |
 | `bd/instalar_agenda.sql` | Crea las tablas y los datos iniciales |

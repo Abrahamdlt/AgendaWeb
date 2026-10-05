@@ -5,11 +5,9 @@ var Proximos = (function () {
 
   function actualizar() {
     if (!lista) return;
-    var hoy = Registros.clave(new Date());
     Registros.cargar()
       .then(function (registros) {
-        // registros.php ya los devuelve ordenados por fecha y hora
-        var siguientes = registros.filter(function (r) { return r.fecha >= hoy; }).slice(0, CUANTOS);
+        var siguientes = Registros.pendientes(registros).slice(0, CUANTOS);
         Registros.pintarLista(lista, siguientes, "No hay registros próximos.", actualizar);
       })
       .catch(function (error) {

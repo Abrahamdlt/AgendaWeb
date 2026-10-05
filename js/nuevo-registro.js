@@ -33,7 +33,7 @@
       var registro = { id: botonEliminar.dataset.id, titulo: botonEliminar.dataset.titulo };
       Registros.confirmarYEliminar(registro)
         .then(function () {
-          location.href = "calendario.html?fecha=" + botonEliminar.dataset.fecha;
+          location.href = "index.php?ok=eliminado";
         })
         .catch(function (error) {
           if (error === null) return;   // canceló

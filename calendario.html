@@ -29,8 +29,9 @@
   <header class="barra">
     <a href="index.php" class="marca">Agenda<span>Web</span></a>
     <nav class="barra__nav">
+      <a href="index.php" class="enlace">Eventos</a>
       <a href="calendario.html" class="enlace enlace--activo" aria-current="page">Calendario</a>
-      <a href="index.php" class="enlace">Nuevo registro</a>
+      <a href="registrar.php" class="enlace">Nuevo registro</a>
     </nav>
     <button type="button" class="boton boton--icono" id="boton-tema"
             aria-label="Cambiar a modo claro" hidden>
@@ -48,44 +49,61 @@
 
   <main class="contenedor contenedor--ancho">
 
-    <!-- Vista mensual -->
-    <section class="tarjeta tarjeta--principal calendario">
-      <div class="calendario__cabecera">
-        <h1 class="titulo" id="calendario-mes" aria-live="polite">Calendario</h1>
-        <div class="calendario__controles">
-          <button type="button" class="boton boton--secundario" id="calendario-hoy">Hoy</button>
-          <button type="button" class="boton boton--icono" id="calendario-anterior" aria-label="Mes anterior">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M15 18l-6-6 6-6"/>
-            </svg>
-          </button>
-          <button type="button" class="boton boton--icono" id="calendario-siguiente" aria-label="Mes siguiente">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M9 18l6-6-6-6"/>
-            </svg>
-          </button>
+    <div class="contenedor__columna">
+
+      <!-- Vista mensual -->
+      <section class="tarjeta tarjeta--principal calendario">
+        <div class="calendario__cabecera">
+          <h1 class="titulo" id="calendario-mes" aria-live="polite">Calendario</h1>
+          <div class="calendario__controles">
+            <button type="button" class="boton boton--secundario" id="calendario-hoy">Hoy</button>
+            <button type="button" class="boton boton--icono" id="calendario-anterior" aria-label="Mes anterior">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M15 18l-6-6 6-6"/>
+              </svg>
+            </button>
+            <button type="button" class="boton boton--icono" id="calendario-siguiente" aria-label="Mes siguiente">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
+            </button>
+          </div>
         </div>
-      </div>
-      <p class="subtitulo">Selecciona un día para ver sus registros. También puedes moverte con las flechas del teclado.</p>
+        <p class="subtitulo">Selecciona un día para ver sus registros abajo. También puedes moverte con las flechas del teclado.</p>
 
-      <div class="calendario__semana" aria-hidden="true">
-        <span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span>
-      </div>
-      <div class="calendario__dias" id="calendario-dias" role="group" aria-labelledby="calendario-mes"></div>
+        <div class="calendario__semana" aria-hidden="true">
+          <span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span>
+        </div>
+        <div class="calendario__dias" id="calendario-dias" role="group" aria-labelledby="calendario-mes"></div>
 
-      <div class="calendario__leyenda">
-        <span><span class="dia__punto"></span> Con registros</span>
-        <span><span class="dia__punto dia__punto--alta"></span> Prioridad alta</span>
-      </div>
-    </section>
+        <div class="calendario__leyenda">
+          <span><span class="dia__punto"></span> Con registros</span>
+          <span><span class="dia__punto dia__punto--alta"></span> Prioridad alta</span>
+        </div>
+      </section>
 
-    <!-- Detalle del día seleccionado -->
-    <aside class="lateral">
-      <h2 class="titulo titulo--chico" id="detalle-titulo">Día</h2>
-      <div class="lista-registros" id="detalle-lista"></div>
-      <a class="boton boton--primario boton--bloque" id="detalle-agregar" href="index.php">Agregar registro este día</a>
+      <!-- Registros del día seleccionado -->
+      <section class="detalle-dia" aria-labelledby="detalle-titulo">
+        <div class="detalle-dia__cabecera">
+          <h2 class="titulo titulo--chico" id="detalle-titulo">Día</h2>
+          <a class="boton boton--secundario boton--chico" id="detalle-agregar" href="registrar.php">Agregar registro este día</a>
+        </div>
+        <div class="lista-registros lista-registros--rejilla" id="detalle-lista"></div>
+      </section>
+
+    </div>
+
+    <!-- Solo el evento más cercano -->
+    <aside class="lateral proximo" aria-labelledby="proximo-titulo">
+      <h2 class="titulo titulo--chico" id="proximo-titulo">Próximo evento</h2>
+      <p class="proximo__cuando" id="proximo-cuando"></p>
+      <div class="lista-registros" id="proximo-lista"></div>
+      <div class="proximo__enlaces">
+        <a class="enlace" id="proximo-ver-dia" href="calendario.html" hidden>Ver ese día</a>
+        <a class="enlace" href="index.php">Ver todos los eventos</a>
+      </div>
     </aside>
 
   </main>

@@ -201,6 +201,12 @@ h1, h2, h3 {
 /* Páginas que necesitan más ancho (calendario) */
 .contenedor--ancho { max-width: 1320px; }
 
+/* Páginas de una sola columna (Eventos) */
+.contenedor--sencillo { grid-template-columns: minmax(0, 1fr); max-width: 980px; }
+
+/* Varias secciones apiladas dentro de una misma columna */
+.contenedor__columna { display: grid; gap: 1.5rem; align-content: start; min-width: 0; }
+
 /* ---------- Tarjetas ---------- */
 .tarjeta {
   background: var(--vidrio-reflejo), var(--vidrio-superficie);
@@ -727,6 +733,74 @@ select.entrada {
 }
 .dia__punto--alta { background: var(--color-alerta); }
 
+/* ---------- Listas de tarjetas en rejilla (Eventos y día del calendario) ---------- */
+.lista-registros--rejilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: 0.75rem;
+}
+.lista-registros--rejilla > .tarjeta { margin-bottom: 0; }
+.lista-registros--rejilla > .tarjeta--vacia { grid-column: 1 / -1; }
+
+/* ---------- Página Eventos ---------- */
+.eventos__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+.eventos__cabecera .subtitulo { margin-bottom: 0; }
+.eventos__cabecera .subtitulo:focus { outline: none; }
+
+.eventos__lista { display: grid; gap: 2rem; }
+
+.eventos__fecha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+.eventos__cuando {
+  font-family: var(--fuente-cuerpo);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--color-texto-secundario);
+}
+
+/* ---------- Calendario: registros del día seleccionado ---------- */
+.detalle-dia__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+.detalle-dia__cabecera .titulo--chico { margin-bottom: 0; }
+
+/* ---------- Calendario: el evento más cercano ---------- */
+.proximo__cuando {
+  margin: -0.375rem 0 0.75rem;
+  font-size: 0.875rem;
+  color: var(--color-texto-secundario);
+}
+.proximo__cuando:empty { display: none; }
+.proximo__enlaces { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; font-size: 0.875rem; }
+
+/* Registro recién guardado: un destello neutro para encontrarlo en la lista */
+@keyframes resaltar {
+  0%, 35% {
+    border-color: var(--color-texto-secundario);
+    box-shadow: var(--vidrio-brillo), var(--sombra-vidrio), 0 0 0 4px rgba(154, 164, 184, 0.25);
+  }
+}
+
 /* =========================================
    Animaciones
    ========================================= */
@@ -836,6 +910,21 @@ select.entrada {
   animation-delay: calc(var(--orden, 0) * 50ms);
 }
 
+/* Eventos: cada día entra escalonado (con tope, para que una lista larga no tarde) */
+.eventos__cabecera,
+.eventos > .aviso { animation: aparecer 600ms var(--curva-apple) backwards; }
+.eventos__grupo {
+  animation: aparecer 600ms var(--curva-apple) backwards;
+  animation-delay: calc(120ms + min(var(--orden, 0), 6) * 70ms);
+}
+.detalle-dia { animation: aparecer 700ms var(--curva-apple) 200ms backwards; }
+
+/* La tarjeta resaltada combina su entrada con el destello */
+.lista-registros > .tarjeta--resaltada {
+  animation: aparecer 450ms var(--curva-apple) backwards,
+             resaltar 2.4s var(--curva-apple) 0.5s backwards;
+}
+
 /* ---------- Barra: se vuelve más sólida al hacer scroll ---------- */
 @keyframes compactar {
   to {
@@ -866,7 +955,16 @@ select.entrada {
 @media (max-width: 560px) {
   .fila,
   .fila--2 { grid-template-columns: 1fr; }
-  .barra__nav { gap: 0.875rem; font-size: 0.875rem; }
+  /* Barra en dos renglones: logo y tema arriba, los tres enlaces abajo */
+  .barra { flex-wrap: wrap; row-gap: 0.625rem; }
+  .barra .boton--icono { margin-left: auto; }
+  .barra__nav {
+    order: 3;
+    width: 100%;
+    margin-left: 0;
+    justify-content: space-between;
+    font-size: 0.9375rem;
+  }
   .acciones { flex-direction: column-reverse; }
   .acciones .boton { width: 100%; }
   .selector, .selector--3 { max-width: none; }

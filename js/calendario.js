@@ -1,9 +1,8 @@
-// Vista mensual del calendario y detalle del día seleccionado.
+// Vista mensual del calendario, registros del día seleccionado y el evento más cercano.
 // Los registros llegan de registros.php (ver js/registros.js).
 (function () {
-  var MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio",
-               "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
-  var DIAS_SEMANA = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+  var MESES = Registros.MESES;
+  var DIAS_SEMANA = Registros.DIAS_SEMANA;
   var MAX_EN_CELDA = 2;   // registros visibles por día; el resto se resume en "+N más"
 
   var clave = Registros.clave;
@@ -16,6 +15,9 @@
   var detalleTitulo = document.getElementById("detalle-titulo");
   var detalleLista = document.getElementById("detalle-lista");
   var detalleAgregar = document.getElementById("detalle-agregar");
+  var proximoCuando = document.getElementById("proximo-cuando");
+  var proximoLista = document.getElementById("proximo-lista");
+  var proximoVerDia = document.getElementById("proximo-ver-dia");
 
   function sumarDias(fecha, n) {
     return new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate() + n);
@@ -29,7 +31,8 @@
 
   // ---------- Estado ----------
   var estado = "cargando";   // cargando | listo | error
-  var porFecha = {};         // "AAAA-MM-DD" -> registros de ese día (ya vienen ordenados de PHP)
+  var todos = [];            // todos los registros (ya vienen ordenados de PHP)
+  var porFecha = {};         // "AAAA-MM-DD" -> registros de ese día
 
   var hoy = new Date();
   hoy = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
@@ -124,10 +127,8 @@
 
   // ---------- Detalle del día ----------
   function renderDetalle() {
-    var nombre = DIAS_SEMANA[seleccionado.getDay()] + ", " + seleccionado.getDate() +
-                 " de " + MESES[seleccionado.getMonth()];
-    detalleTitulo.textContent = capitalizar(nombre);
-    detalleAgregar.href = "index.php?fecha=" + clave(seleccionado);
+    detalleTitulo.textContent = Registros.nombreFecha(seleccionado);
+    detalleAgregar.href = "registrar.php?fecha=" + clave(seleccionado);
 
     if (estado === "cargando") {
       detalleLista.replaceChildren(Registros.crearVacia("Cargando registros…"));
@@ -139,6 +140,34 @@
                             recargarTrasEliminar);
     }
   }
+
+  // ---------- Evento más cercano (columna derecha) ----------
+  function renderProximo() {
+    var proximo = estado === "listo" ? Registros.pendientes(todos)[0] : null;
+    proximoVerDia.hidden = !proximo;
+
+    if (estado === "cargando") {
+      proximoCuando.textContent = "";
+      proximoLista.replaceChildren(Registros.crearVacia("Cargando…"));
+    } else if (!proximo) {
+      proximoCuando.textContent = "";
+      proximoLista.replaceChildren(Registros.crearVacia(
+        estado === "error" ? "No se pudieron cargar los registros." : "No tienes eventos pendientes."));
+    } else {
+      var fecha = desdeClave(proximo.fecha);
+      proximoCuando.textContent = Registros.cuando(fecha) + " · " + Registros.nombreFecha(fecha);
+      Registros.pintarLista(proximoLista, [proximo], "", recargarTrasEliminar);
+      proximoVerDia.href = "calendario.html?fecha=" + proximo.fecha;
+    }
+  }
+
+  // "Ver ese día" selecciona la fecha del próximo evento sin recargar la página
+  proximoVerDia.addEventListener("click", function (e) {
+    var fecha = new URL(proximoVerDia.href).searchParams.get("fecha");
+    if (!Registros.esClave(fecha)) return;
+    e.preventDefault();
+    seleccionar(desdeClave(fecha), true);
+  });
 
   // ---------- Acciones ----------
   function seleccionar(fecha, enfocar) {
@@ -194,10 +223,12 @@
     renderMes(0);
     actualizarSeleccion();
     renderDetalle();
+    renderProximo();
   }
   function cargarRegistros(enfocarDia) {
     return Registros.cargar()
       .then(function (registros) {
+        todos = registros;
         agrupar(registros);
         estado = "listo";
       })
