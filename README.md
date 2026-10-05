@@ -41,7 +41,7 @@ Hecha con HTML, CSS y JavaScript (sin frameworks), PHP y MySQL.
 | `ayudas.php` | Funciones pequeñas que comparten las páginas PHP |
 | `datos.php` | Consultas preparadas a la base (leer, guardar, actualizar, eliminar) |
 | `conexion.ejemplo.php` | Plantilla de `conexion.php` (conexión a MySQL, sin datos reales) |
-| `calendario.html` | Vista mensual, registros del día seleccionado y el evento más cercano |
+| `calendario.php` | Vista mensual, registros del día seleccionado y el evento más cercano |
 | `registros.php` | Devuelve los registros en JSON (calendario y "Próximos") |
 | `eliminar.php` | Elimina un registro |
 | `bd/instalar_agenda.sql` | Crea las tablas y los datos iniciales |

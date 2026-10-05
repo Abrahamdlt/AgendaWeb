@@ -106,7 +106,7 @@ function marcado(bool $condicion, string $atributo): string
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="<?= e(recurso('css/styles.css')) ?>">
 
   <!-- Aplica el tema guardado antes de pintar, para evitar un parpadeo -->
   <script>
@@ -117,10 +117,10 @@ function marcado(bool $condicion, string $atributo): string
       document.documentElement.dataset.tema = tema;
     })();
   </script>
-  <script src="js/tema.js" defer></script>
-  <script src="js/registros.js" defer></script>
-  <script src="js/proximos.js" defer></script>
-  <script src="js/nuevo-registro.js" defer></script>
+  <script src="<?= e(recurso('js/tema.js')) ?>" defer></script>
+  <script src="<?= e(recurso('js/registros.js')) ?>" defer></script>
+  <script src="<?= e(recurso('js/proximos.js')) ?>" defer></script>
+  <script src="<?= e(recurso('js/nuevo-registro.js')) ?>" defer></script>
 </head>
 <body>
 
@@ -128,7 +128,7 @@ function marcado(bool $condicion, string $atributo): string
     <a href="index.php" class="marca">Agenda<span>Web</span></a>
     <nav class="barra__nav">
       <a href="index.php" class="enlace">Eventos</a>
-      <a href="calendario.html" class="enlace">Calendario</a>
+      <a href="calendario.php" class="enlace">Calendario</a>
       <a href="registrar.php" class="enlace enlace--activo" aria-current="page">Nuevo registro</a>
     </nav>
     <button type="button" class="boton boton--icono" id="boton-tema"

@@ -37,7 +37,7 @@
   var hoy = new Date();
   hoy = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
 
-  // Se puede abrir en una fecha concreta: calendario.html?fecha=AAAA-MM-DD
+  // Se puede abrir en una fecha concreta: calendario.php?fecha=AAAA-MM-DD
   var fechaInicial = new URLSearchParams(location.search).get("fecha");
   var seleccionado = Registros.esClave(fechaInicial) ? desdeClave(fechaInicial) : hoy;
   var vista = new Date(seleccionado.getFullYear(), seleccionado.getMonth(), 1);
@@ -134,7 +134,7 @@
       detalleLista.replaceChildren(Registros.crearVacia("Cargando registros…"));
     } else if (estado === "error") {
       detalleLista.replaceChildren(Registros.crearVacia(
-        "No se pudieron cargar los registros. Abre la página desde el servidor PHP."));
+        "No se pudieron cargar los registros. Recarga la página para intentarlo de nuevo."));
     } else {
       Registros.pintarLista(detalleLista, registrosDe(seleccionado), "No hay registros este día.",
                             recargarTrasEliminar);
@@ -157,7 +157,7 @@
       var fecha = desdeClave(proximo.fecha);
       proximoCuando.textContent = Registros.cuando(fecha) + " · " + Registros.nombreFecha(fecha);
       Registros.pintarLista(proximoLista, [proximo], "", recargarTrasEliminar);
-      proximoVerDia.href = "calendario.html?fecha=" + proximo.fecha;
+      proximoVerDia.href = "calendario.php?fecha=" + proximo.fecha;
     }
   }
 

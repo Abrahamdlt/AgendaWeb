@@ -13,7 +13,7 @@ var Proximos = (function () {
       .catch(function (error) {
         console.error(error);
         lista.replaceChildren(Registros.crearVacia(
-          "No se pudieron cargar los registros. Abre la página desde el servidor PHP."));
+          "No se pudieron cargar los registros. Recarga la página para intentarlo de nuevo."));
       });
   }
 
