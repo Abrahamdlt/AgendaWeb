@@ -5,6 +5,7 @@ var Registros = (function () {
                "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
   var MESES_CORTOS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
   var DIAS_SEMANA = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+  var PRIORIDADES = { baja: "Baja", media: "Media", alta: "Alta" };
 
   // ---------- Comunicación con PHP ----------
   function pedirJson(url, opciones) {
@@ -163,7 +164,9 @@ var Registros = (function () {
   // se llama a esa función después de eliminar para recargar la lista.
   function crearTarjeta(r, alCambiar) {
     var fecha = desdeClave(r.fecha);
-    var tarjeta = crear("article", "tarjeta tarjeta--registro");
+    // Solo valores conocidos terminan en la clase (baja, media o alta)
+    var prioridad = PRIORIDADES.hasOwnProperty(r.prioridad) ? r.prioridad : "media";
+    var tarjeta = crear("article", "tarjeta tarjeta--registro tarjeta--prioridad-" + prioridad);
     tarjeta.dataset.id = r.id;
 
     var hora = crear("div", "registro__hora");
@@ -182,10 +185,9 @@ var Registros = (function () {
     info.appendChild(crear("p", "registro__meta", partes.join(" · ")));
 
     info.appendChild(crear("span", "insignia", capitalizar(r.categoria)));
-    if (r.prioridad === "alta") {
-      info.appendChild(document.createTextNode(" "));
-      info.appendChild(crear("span", "insignia insignia--alta", "Alta"));
-    }
+    // La prioridad también va escrita, para no depender solo del color de la franja
+    info.appendChild(document.createTextNode(" "));
+    info.appendChild(crear("span", "insignia insignia--" + prioridad, PRIORIDADES[prioridad]));
 
     if (alCambiar) {
       var acciones = crear("div", "registro__acciones");

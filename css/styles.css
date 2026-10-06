@@ -224,19 +224,40 @@ h1, h2, h3 {
 }
 
 .tarjeta--registro {
+  --capa-prioridad: none;   /* la pone la prioridad (abajo); baja no lleva color */
   display: flex;
   gap: 1rem;
   align-items: flex-start;
   margin-bottom: 0.75rem;
+  background: var(--capa-prioridad), var(--vidrio-reflejo), var(--vidrio-superficie);
   transition: border-color var(--transicion), background var(--transicion),
               transform var(--duracion-resorte) var(--curva-resorte);
 }
 .tarjeta--registro:hover {
   border-color: var(--vidrio-borde-hover);
-  background: var(--vidrio-reflejo), var(--vidrio-superficie-2);
+  background: var(--capa-prioridad), var(--vidrio-reflejo), var(--vidrio-superficie-2);
   transform: translateY(-3px);
 }
 .tarjeta--registro:active { transform: translateY(-1px) scale(0.985); }
+
+/* Prioridad: una franja en el borde izquierdo que se disuelve en el vidrio.
+   Solo colores de la paleta: alta = alerta, media = texto secundario, baja = sin color. */
+.tarjeta--prioridad-alta  { --tinte: 255, 92, 138; }    /* --color-alerta */
+.tarjeta--prioridad-media { --tinte: 154, 164, 184; }   /* --color-texto-secundario */
+:root[data-tema="claro"] .tarjeta--prioridad-alta  { --tinte: 200, 30, 84; }
+:root[data-tema="claro"] .tarjeta--prioridad-media { --tinte: 74, 85, 112; }
+
+.tarjeta--prioridad-alta,
+.tarjeta--prioridad-media {
+  --capa-prioridad: linear-gradient(90deg,
+    rgba(var(--tinte), 0.42) 0,
+    rgba(var(--tinte), 0.16) 10px,
+    rgba(var(--tinte), 0.06) 32%,
+    rgba(var(--tinte), 0) 60%);
+  border-left-color: rgba(var(--tinte), 0.5);
+}
+.tarjeta--prioridad-alta:hover,
+.tarjeta--prioridad-media:hover { border-left-color: rgba(var(--tinte), 0.75); }
 
 .tarjeta--vacia {
   background: transparent;
@@ -558,6 +579,16 @@ select.entrada {
   color: var(--color-alerta);
   border-color: rgba(255, 92, 138, 0.4);
   background: rgba(255, 92, 138, 0.08);
+}
+.insignia--media {
+  color: var(--color-texto-secundario);
+  border-color: rgba(154, 164, 184, 0.45);
+  background: rgba(154, 164, 184, 0.1);
+}
+.insignia--baja {
+  color: var(--color-texto-secundario);
+  border-color: var(--color-borde);
+  background: transparent;
 }
 
 /* Botón a todo el ancho de su contenedor */

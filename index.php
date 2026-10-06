@@ -32,8 +32,10 @@ function mostrarEvento(array $ev): string
     $meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
     $id = (int) $ev['id'];                         // el id SIEMPRE como número
     $marca = strtotime($ev['fecha']);
+    // Solo valores de la lista blanca terminan en la clase (baja, media o alta)
+    $prioridad = array_key_exists($ev['prioridad'] ?? '', PRIORIDADES) ? $ev['prioridad'] : 'media';
 
-    $html  = '<article class="tarjeta tarjeta--registro" data-id="' . $id . '">';
+    $html  = '<article class="tarjeta tarjeta--registro tarjeta--prioridad-' . $prioridad . '" data-id="' . $id . '">';
 
     // Cuadro con el día y el mes
     $html .= '<div class="registro__hora">'
@@ -62,9 +64,8 @@ function mostrarEvento(array $ev): string
     }
 
     $html .= '<span class="insignia">' . e(nombreCategoria($ev['categoria'])) . '</span>';
-    if (($ev['prioridad'] ?? '') === 'alta') {
-        $html .= ' <span class="insignia insignia--alta">Alta</span>';
-    }
+    // La prioridad también va escrita, para no depender solo del color de la franja
+    $html .= ' <span class="insignia insignia--' . $prioridad . '">' . PRIORIDADES[$prioridad] . '</span>';
 
     $html .= '<div class="registro__acciones">'
            . '<a href="registrar.php?editar=' . $id . '" class="boton boton--secundario boton--chico"'
