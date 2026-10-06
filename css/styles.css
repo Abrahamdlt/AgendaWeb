@@ -536,6 +536,12 @@ select.entrada {
   font-size: 0.875rem;
   color: var(--color-texto-secundario);
 }
+.registro__texto {
+  margin: 0 0 0.625rem;
+  font-size: 0.875rem;
+  color: var(--color-texto);
+  overflow-wrap: anywhere;
+}
 
 /* ---------- Insignias ---------- */
 .insignia {
@@ -580,6 +586,8 @@ select.entrada {
   gap: 0.5rem;
   margin-top: 0.75rem;
 }
+/* El botón Eliminar va dentro de un formulario POST: el formulario no ocupa lugar propio */
+.registro__borrar { display: contents; }
 
 /* ---------- Diálogo de confirmación ---------- */
 .dialogo {
@@ -752,26 +760,7 @@ select.entrada {
   margin-bottom: 1.75rem;
 }
 .eventos__cabecera .subtitulo { margin-bottom: 0; }
-.eventos__cabecera .subtitulo:focus { outline: none; }
 
-.eventos__lista { display: grid; gap: 2rem; }
-
-.eventos__fecha {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.25rem 0.75rem;
-  margin-bottom: 0.75rem;
-  font-size: 1.125rem;
-  font-weight: 600;
-}
-.eventos__cuando {
-  font-family: var(--fuente-cuerpo);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  letter-spacing: 0;
-  color: var(--color-texto-secundario);
-}
 
 /* ---------- Calendario: registros del día seleccionado ---------- */
 .detalle-dia__cabecera {
@@ -910,13 +899,9 @@ select.entrada {
   animation-delay: calc(var(--orden, 0) * 50ms);
 }
 
-/* Eventos: cada día entra escalonado (con tope, para que una lista larga no tarde) */
+/* Eventos */
 .eventos__cabecera,
 .eventos > .aviso { animation: aparecer 600ms var(--curva-apple) backwards; }
-.eventos__grupo {
-  animation: aparecer 600ms var(--curva-apple) backwards;
-  animation-delay: calc(120ms + min(var(--orden, 0), 6) * 70ms);
-}
 .detalle-dia { animation: aparecer 700ms var(--curva-apple) 200ms backwards; }
 
 /* La tarjeta resaltada combina su entrada con el destello */

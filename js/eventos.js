@@ -1,77 +1,29 @@
-// Página Eventos (index.php): todos los registros pendientes, agrupados por día.
+// Página Eventos (index.php). Las tarjetas las genera PHP con mostrarEvento();
+// esto solo agrega mejoras que no son indispensables:
+//  - pedir confirmación antes de eliminar (sin JavaScript el formulario funciona igual)
+//  - resaltar el registro recién guardado después de la redirección
 (function () {
-  var lista = document.getElementById("eventos-lista");
-  var resumen = document.getElementById("eventos-resumen");
-  if (!lista) return;
+  // ---------- Confirmar antes de eliminar ----------
+  document.addEventListener("submit", function (e) {
+    var formulario = e.target.closest(".registro__borrar");
+    if (!formulario) return;
+    e.preventDefault();
+    Registros.confirmar("¿Eliminar este registro?",
+                        "«" + formulario.dataset.titulo + "» se borrará de tu agenda. Esta acción no se puede deshacer.")
+      .then(function (confirmado) {
+        // submit() envía el formulario sin volver a pasar por este evento
+        if (confirmado) formulario.submit();
+      });
+  });
 
-  // Después de guardar o editar (PRG) se resalta ese registro en la lista
+  // ---------- Resaltar el registro recién guardado (index.php?ok=creado&id=5) ----------
   var parametros = new URLSearchParams(location.search);
-  var idResaltado = /^(creado|actualizado)$/.test(parametros.get("ok") || "") ? parametros.get("id") : null;
-
-  function crearGrupo(fechaClave, registros, orden, alCambiar) {
-    var fecha = Registros.desdeClave(fechaClave);
-    var grupo = Registros.crear("section", "eventos__grupo");
-    grupo.style.setProperty("--orden", orden);
-
-    var titulo = Registros.crear("h2", "eventos__fecha");
-    titulo.appendChild(Registros.crear("span", null, Registros.nombreFecha(fecha)));
-    titulo.appendChild(Registros.crear("span", "eventos__cuando", Registros.cuando(fecha)));
-
-    var tarjetas = Registros.crear("div", "lista-registros lista-registros--rejilla");
-    Registros.pintarLista(tarjetas, registros, "", alCambiar);
-
-    grupo.append(titulo, tarjetas);
-    return grupo;
-  }
-
-  function pintar(registros, trasEliminar) {
-    var pendientes = Registros.pendientes(registros);
-    var total = pendientes.length;
-    resumen.textContent = total === 0 ? "No tienes eventos pendientes."
-      : total === 1 ? "Tienes 1 evento pendiente." : "Tienes " + total + " eventos pendientes.";
-
-    if (!total) {
-      lista.replaceChildren(Registros.crearVacia("Cuando agregues un evento o una cita, aparecerá aquí."));
-    } else {
-      // Agrupa los registros consecutivos del mismo día (ya vienen ordenados por fecha y hora)
-      var grupos = [];
-      pendientes.forEach(function (r) {
-        var ultimo = grupos[grupos.length - 1];
-        if (!ultimo || ultimo.fecha !== r.fecha) grupos.push(ultimo = { fecha: r.fecha, registros: [] });
-        ultimo.registros.push(r);
-      });
-      var fragmento = document.createDocumentFragment();
-      grupos.forEach(function (g, i) {
-        fragmento.appendChild(crearGrupo(g.fecha, g.registros, i, recargarTrasEliminar));
-      });
-      lista.replaceChildren(fragmento);
+  var id = parametros.get("id");
+  if (/^(creado|actualizado)$/.test(parametros.get("ok") || "") && /^\d+$/.test(id || "")) {
+    var tarjeta = document.querySelector('.tarjeta--registro[data-id="' + id + '"]');
+    if (tarjeta) {
+      tarjeta.classList.add("tarjeta--resaltada");
+      tarjeta.scrollIntoView({ block: "nearest" });
     }
-
-    if (idResaltado && !trasEliminar) {
-      var tarjeta = lista.querySelector('[data-id="' + idResaltado + '"]');
-      if (tarjeta) {
-        tarjeta.classList.add("tarjeta--resaltada");
-        tarjeta.scrollIntoView({ block: "nearest" });
-      }
-    }
-    // Al eliminar, la tarjeta (y su botón con el foco) desaparece: el foco pasa al resumen,
-    // que además anuncia cuántos quedan
-    if (trasEliminar) resumen.focus();
   }
-
-  function cargar(trasEliminar) {
-    return Registros.cargar()
-      .then(function (registros) { pintar(registros, trasEliminar); })
-      .catch(function (error) {
-        console.error(error);
-        lista.replaceChildren(Registros.crearVacia(
-          "No se pudieron cargar los eventos. Recarga la página para intentarlo de nuevo."));
-      });
-  }
-
-  function recargarTrasEliminar() {
-    return cargar(true);
-  }
-
-  cargar(false);
 })();

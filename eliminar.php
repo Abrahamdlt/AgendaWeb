@@ -1,10 +1,12 @@
 <?php
-// Elimina un registro (POST con "id") y responde JSON:
-//   200 { ok: true }
-//   404 { ok: false, error: "..." }   el registro ya no existía
+// Elimina un registro (POST con "id").
+// - Desde el formulario "Eliminar" de una tarjeta (index.php): redirige a la lista
+//   con el aviso (patrón PRG): index.php?ok=eliminado
+// - Desde JavaScript (calendario, "Próximos"; envía Accept: application/json): responde JSON
+//     200 { ok: true }      404 { ok: false, error: "..." }
 require __DIR__ . '/datos.php';
 
-header('Content-Type: application/json; charset=utf-8');
+$quiere_json = str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -12,17 +14,25 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+function responder(int $codigo, array $json, string $redireccion, bool $quiere_json): void
+{
+    if ($quiere_json) {
+        http_response_code($codigo);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($json);
+    } else {
+        header('Location: ' . $redireccion, true, 303);   // Redirect → GET (PRG)
+    }
+    exit;
+}
+
 $id = $_POST['id'] ?? '';
 if (!is_string($id) || !ctype_digit($id)) {
-    http_response_code(422);
-    echo json_encode(['ok' => false, 'error' => 'Falta el id del registro.']);
-    exit;
+    responder(422, ['ok' => false, 'error' => 'Falta el id del registro.'], 'index.php?error=noexiste', $quiere_json);
 }
 
 if (!eliminar_registro((int) $id)) {
-    http_response_code(404);
-    echo json_encode(['ok' => false, 'error' => 'Ese registro ya no existe.']);
-    exit;
+    responder(404, ['ok' => false, 'error' => 'Ese registro ya no existe.'], 'index.php?error=noexiste', $quiere_json);
 }
 
-echo json_encode(['ok' => true]);
+responder(200, ['ok' => true], 'index.php?ok=eliminado', $quiere_json);

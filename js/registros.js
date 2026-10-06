@@ -256,6 +256,7 @@ var Registros = (function () {
     MESES: MESES,
     DIAS_SEMANA: DIAS_SEMANA,
     cargar: cargar,
+    confirmar: confirmar,
     confirmarYEliminar: confirmarYEliminar,
     clave: clave,
     desdeClave: desdeClave,

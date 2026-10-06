@@ -35,7 +35,7 @@ Hecha con HTML, CSS y JavaScript (sin frameworks), PHP y MySQL.
 
 | Archivo | Qué hace |
 |---|---|
-| `index.php` | Página principal **Eventos**: todos los pendientes agrupados por día. Muestra el mensaje de éxito tras guardar, editar o eliminar (`index.php?ok=...`) |
+| `index.php` | Página principal **Eventos**: PHP genera una tarjeta por evento con `foreach` y `mostrarEvento()` (datos de la tabla `eventos`). Muestra el contador y el mensaje tras guardar, editar o eliminar (`index.php?ok=...`) |
 | `registrar.php` | Formulario para crear o editar un registro (`registrar.php?editar=ID`) y lista "Próximos". Valida en el servidor, vuelve a mostrar lo escrito si hay errores y usa PRG (redirige a `index.php?ok=...`) |
 | `validacion.php` | Campos obligatorios, formatos y listas blancas del formulario |
 | `ayudas.php` | Funciones pequeñas que comparten las páginas PHP |
@@ -43,7 +43,7 @@ Hecha con HTML, CSS y JavaScript (sin frameworks), PHP y MySQL.
 | `conexion.ejemplo.php` | Plantilla de `conexion.php` (conexión a MySQL, sin datos reales) |
 | `calendario.php` | Vista mensual, registros del día seleccionado y el evento más cercano |
 | `registros.php` | Devuelve los registros en JSON (calendario y "Próximos") |
-| `eliminar.php` | Elimina un registro |
+| `eliminar.php` | Elimina un registro (desde el formulario de una tarjeta redirige a la lista; desde JavaScript responde JSON) |
 | `bd/instalar_agenda.sql` | Crea las tablas y los datos iniciales |
 | `bd/respaldo_agenda_antes.sql`, `bd/actualizar_agenda.sql` | Base original y cómo se actualizó (historial) |
 | `css/styles.css` | Estilos (sistema de marca "Pulso Neón", modo claro/oscuro) |
