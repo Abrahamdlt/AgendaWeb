@@ -63,9 +63,11 @@ function mostrarEvento(array $ev): string
         $html .= '<p class="registro__texto">' . e($ev['descripcion']) . '</p>';
     }
 
-    $html .= '<span class="insignia">' . e(nombreCategoria($ev['categoria'])) . '</span>';
     // La prioridad también va escrita, para no depender solo del color de la franja
-    $html .= ' <span class="insignia insignia--' . $prioridad . '">' . PRIORIDADES[$prioridad] . '</span>';
+    $html .= '<p class="registro__datos">'
+           . '<span class="insignia insignia--categoria">' . e(nombreCategoria($ev['categoria'])) . '</span>'
+           . '<span class="insignia insignia--' . $prioridad . '">Prioridad ' . $prioridad . '</span>'
+           . '</p>';
 
     $html .= '<div class="registro__acciones">'
            . '<a href="registrar.php?editar=' . $id . '" class="boton boton--secundario boton--chico"'

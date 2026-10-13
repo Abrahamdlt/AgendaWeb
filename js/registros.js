@@ -184,10 +184,11 @@ var Registros = (function () {
     if (r.persona) partes.push("con " + r.persona);
     info.appendChild(crear("p", "registro__meta", partes.join(" · ")));
 
-    info.appendChild(crear("span", "insignia", capitalizar(r.categoria)));
     // La prioridad también va escrita, para no depender solo del color de la franja
-    info.appendChild(document.createTextNode(" "));
-    info.appendChild(crear("span", "insignia insignia--" + prioridad, PRIORIDADES[prioridad]));
+    var datos = crear("p", "registro__datos");
+    datos.appendChild(crear("span", "insignia insignia--categoria", capitalizar(r.categoria)));
+    datos.appendChild(crear("span", "insignia insignia--" + prioridad, "Prioridad " + prioridad));
+    info.appendChild(datos);
 
     if (alCambiar) {
       var acciones = crear("div", "registro__acciones");
@@ -264,7 +265,6 @@ var Registros = (function () {
     desdeClave: desdeClave,
     esClave: esClave,
     capitalizar: capitalizar,
-    hoy: hoy,
     nombreFecha: nombreFecha,
     cuando: cuando,
     pendientes: pendientes,
