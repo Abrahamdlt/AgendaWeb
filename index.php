@@ -1,4 +1,5 @@
 <?php
+require __DIR__ . '/partes/sesion.php';   // solo con sesión iniciada: define $usuarioId y $usuarioNombre
 // =========================================
 // AgendaWeb · Eventos (página principal)
 // =========================================
@@ -7,7 +8,7 @@
 //
 // También es el destino de la redirección PRG de registrar.php y eliminar.php:
 //   index.php?ok=creado&id=5    index.php?ok=actualizado&id=5    index.php?ok=eliminado
-require __DIR__ . '/datos.php';        // conexion.php ($conexion) y obtener_registro()
+require __DIR__ . '/datos.php';        // conexion.php ($conexion), obtener_registro() y resumen_por_categoria()
 require __DIR__ . '/validacion.php';   // CATEGORIAS: clave => nombre
 require __DIR__ . '/ayudas.php';       // e() (limpia texto contra XSS), recurso(), numero_de_url()
 
@@ -88,7 +89,7 @@ $ok = $_GET['ok'] ?? '';
 
 if ($ok === 'creado' || $ok === 'actualizado') {
     $id = numero_de_url('id');
-    $registro = $id !== null ? obtener_registro($id) : null;
+    $registro = $id !== null ? obtener_registro($id, $usuarioId) : null;
     if ($registro !== null) {
         $aviso = [
             'texto' => $ok === 'creado'
@@ -109,14 +110,22 @@ if ($ok === 'creado' || $ok === 'actualizado') {
 // ---------- Paso 7 · Los eventos, desde MySQL ----------
 // Los alias (AS) dejan las mismas claves que el arreglo de ejemplo de la práctica
 // (hora, categoria, descripcion), así mostrarEvento() y el foreach no cambian.
-$resultado = $conexion->query(
+// P8: la consulta lleva un dato del usuario, así que pasa de query() a prepare().
+$consulta = $conexion->prepare(
     'SELECT e.id, e.titulo, e.fecha, e.hora_inicio AS hora, e.hora_fin, e.lugar,
             c.clave AS categoria, e.prioridad, e.notas AS descripcion
        FROM eventos e
        JOIN categoria c ON c.id = e.categoria_id
+      WHERE e.usuario_id = ?
       ORDER BY e.fecha, e.hora_inicio'
 );
-$eventos = $resultado->fetch_all(MYSQLI_ASSOC);   // ← un arreglo de arreglos asociativos
+$consulta->bind_param('i', $usuarioId);
+$consulta->execute();
+$eventos = $consulta->get_result()->fetch_all(MYSQLI_ASSOC);   // ← un arreglo de arreglos asociativos
+$consulta->close();
+
+// Resumen: cuántos eventos tienes en cada categoría (las vacías salen con 0)
+$resumen = resumen_por_categoria($usuarioId);
 $conexion->close();
 
 $total = count($eventos);
@@ -156,6 +165,10 @@ $total = count($eventos);
       <a href="calendario.php" class="enlace">Calendario</a>
       <a href="registrar.php" class="enlace">Nuevo registro</a>
     </nav>
+    <div class="barra__usuario">
+      <span class="barra__saludo">Hola, <?= e($usuarioNombre) ?></span>
+      <a href="logout.php" class="enlace">Salir</a>
+    </div>
     <button type="button" class="boton boton--icono" id="boton-tema"
             aria-label="Cambiar a modo claro" hidden>
       <svg class="icono-luna" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -178,6 +191,9 @@ $total = count($eventos);
           <h1 class="titulo" id="eventos-titulo">Eventos</h1>
           <!-- Paso 6 · El contador ya no está escrito a mano -->
           <p class="subtitulo"><?= $total ?> <?= $total === 1 ? 'evento registrado' : 'eventos registrados' ?></p>
+          <p class="subtitulo">Por categoría:
+            <?php foreach ($resumen as $i => $fila): ?><?= $i > 0 ? ' · ' : ' ' ?><?= e($fila['nombre']) ?> <?= (int) $fila['total'] ?><?php endforeach; ?>
+          </p>
         </div>
         <a class="boton boton--primario" href="registrar.php">Nuevo registro</a>
       </div>

@@ -1,4 +1,5 @@
 <?php
+require __DIR__ . '/partes/sesion.php';   // solo con sesión iniciada
 // Elimina un registro (POST con "id").
 // - Desde el formulario "Eliminar" de una tarjeta (index.php): redirige a la lista
 //   con el aviso (patrón PRG): index.php?ok=eliminado
@@ -31,7 +32,7 @@ if (!is_string($id) || !ctype_digit($id)) {
     responder(422, ['ok' => false, 'error' => 'Falta el id del registro.'], 'index.php?error=noexiste', $quiere_json);
 }
 
-if (!eliminar_registro((int) $id)) {
+if (!eliminar_registro((int) $id, $usuarioId)) {   // solo borra si el evento es tuyo
     responder(404, ['ok' => false, 'error' => 'Ese registro ya no existe.'], 'index.php?error=noexiste', $quiere_json);
 }
 

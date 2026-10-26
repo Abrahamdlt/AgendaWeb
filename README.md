@@ -37,6 +37,8 @@ Hecha con HTML, CSS y JavaScript (sin frameworks), PHP y MySQL.
 |---|---|
 | `index.php` | Página principal **Eventos**: PHP genera una tarjeta por evento con `foreach` y `mostrarEvento()` (datos de la tabla `eventos`). Muestra el contador y el mensaje tras guardar, editar o eliminar (`index.php?ok=...`) |
 | `registrar.php` | Formulario para crear o editar un registro (`registrar.php?editar=ID`) y lista "Próximos". Valida en el servidor, vuelve a mostrar lo escrito si hay errores y usa PRG (redirige a `index.php?ok=...`) |
+| `registro.php`, `login.php`, `logout.php` | Crear cuenta (contraseña guardada con `password_hash`), iniciar sesión (`password_verify`) y cerrar sesión |
+| `partes/sesion.php` | El guardia: va en la primera línea de cada página privada; sin sesión manda a `login.php` y define `$usuarioId` |
 | `validacion.php` | Campos obligatorios, formatos y listas blancas del formulario |
 | `ayudas.php` | Funciones pequeñas que comparten las páginas PHP |
 | `datos.php` | Consultas preparadas a la base (leer, guardar, actualizar, eliminar) |
@@ -46,5 +48,6 @@ Hecha con HTML, CSS y JavaScript (sin frameworks), PHP y MySQL.
 | `eliminar.php` | Elimina un registro (desde el formulario de una tarjeta redirige a la lista; desde JavaScript responde JSON) |
 | `bd/instalar_agenda.sql` | Crea las tablas y los datos iniciales |
 | `bd/respaldo_agenda_antes.sql`, `bd/actualizar_agenda.sql` | Base original y cómo se actualizó (historial) |
+| `bd/migracion_p8.sql` | Práctica 8: tabla `usuarios` y columna `usuario_id` en `eventos` (cada evento con dueño) |
 | `css/styles.css` | Estilos (sistema de marca "Pulso Neón", modo claro/oscuro) |
 | `js/` | Calendario, formulario, lista "Próximos" y cambio de tema |

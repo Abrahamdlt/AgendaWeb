@@ -1,4 +1,5 @@
 <?php
+require __DIR__ . '/partes/sesion.php';   // solo con sesión iniciada
 // Calendario mensual. Es .php solo para pedir el CSS y el JS con su versión (ver ayudas.php).
 require __DIR__ . '/ayudas.php';
 ?>
@@ -37,6 +38,10 @@ require __DIR__ . '/ayudas.php';
       <a href="calendario.php" class="enlace enlace--activo" aria-current="page">Calendario</a>
       <a href="registrar.php" class="enlace">Nuevo registro</a>
     </nav>
+    <div class="barra__usuario">
+      <span class="barra__saludo">Hola, <?= e($usuarioNombre) ?></span>
+      <a href="logout.php" class="enlace">Salir</a>
+    </div>
     <button type="button" class="boton boton--icono" id="boton-tema"
             aria-label="Cambiar a modo claro" hidden>
       <svg class="icono-luna" viewBox="0 0 24 24" fill="none" stroke="currentColor"

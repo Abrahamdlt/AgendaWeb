@@ -1,4 +1,5 @@
 <?php
+require __DIR__ . '/partes/sesion.php';   // solo con sesión iniciada: define $usuarioId y $usuarioNombre
 // =========================================
 // AgendaWeb · Formulario de registro
 // =========================================
@@ -26,12 +27,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     [$datos, $errores] = validar_registro($valores);
 
     if (!$errores && $valores['id'] === '') {
-        $registro = guardar_registro($datos);
+        $registro = guardar_registro($datos, $usuarioId);   // el evento queda a tu nombre
         header('Location: index.php?ok=creado&id=' . $registro['id'], true, 303);   // Redirect
         exit;
     }
     if (!$errores) {
-        $registro = actualizar_registro((int) $valores['id'], $datos);
+        $registro = actualizar_registro((int) $valores['id'], $datos, $usuarioId);   // solo si es tuyo
         if ($registro !== null) {
             header('Location: index.php?ok=actualizado&id=' . $registro['id'], true, 303);
             exit;
@@ -45,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // ---------- 3. Página pedida por GET ----------
     $id_editar = numero_de_url('editar');
     if ($id_editar !== null) {
-        $registro = obtener_registro($id_editar);
+        $registro = obtener_registro($id_editar, $usuarioId);   // un id ajeno no se encuentra
         if ($registro !== null) {
             $valores = registro_a_valores($registro);
         } else {
@@ -131,6 +132,10 @@ function marcado(bool $condicion, string $atributo): string
       <a href="calendario.php" class="enlace">Calendario</a>
       <a href="registrar.php" class="enlace enlace--activo" aria-current="page">Nuevo registro</a>
     </nav>
+    <div class="barra__usuario">
+      <span class="barra__saludo">Hola, <?= e($usuarioNombre) ?></span>
+      <a href="logout.php" class="enlace">Salir</a>
+    </div>
     <button type="button" class="boton boton--icono" id="boton-tema"
             aria-label="Cambiar a modo claro" hidden>
       <svg class="icono-luna" viewBox="0 0 24 24" fill="none" stroke="currentColor"

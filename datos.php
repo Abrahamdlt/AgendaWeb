@@ -2,9 +2,11 @@
 // =========================================
 // AgendaWeb · Capa de datos
 // =========================================
-// Es el único archivo que habla con MySQL (tablas "eventos" y "categoria",
-// ver bd/instalar_agenda.sql). index.php, registros.php y eliminar.php solo
-// llaman a estas funciones.
+// Es el único archivo que habla con MySQL (tablas "eventos", "categoria" y "usuarios",
+// ver bd/instalar_agenda.sql y bd/migracion_p8.sql). Las páginas solo llaman a estas funciones.
+//
+// Autorización (P8): toda función de eventos recibe $usuario_id y lleva
+// "AND usuario_id = ?", así cada quien ve, edita y borra SOLO lo suyo.
 require __DIR__ . '/conexion.php';
 
 // Si una consulta falla, se responde un mensaje de error en lugar de romper la página
@@ -41,50 +43,54 @@ function formatear_registro(array $fila): array
     return $fila;
 }
 
-// Todos los registros, por fecha; dentro del día, los de "todo el día" primero y luego por hora
-function obtener_registros(): array
+// Los registros del usuario, por fecha; dentro del día, los de "todo el día" primero y luego por hora
+function obtener_registros(int $usuario_id): array
 {
     global $conexion;
-    $resultado = $conexion->query(CONSULTA_EVENTOS . ' ORDER BY e.fecha, e.todo_el_dia DESC, e.hora_inicio');
-    return array_map('formatear_registro', $resultado->fetch_all(MYSQLI_ASSOC));
+    $consulta = $conexion->prepare(
+        CONSULTA_EVENTOS . ' WHERE e.usuario_id = ? ORDER BY e.fecha, e.todo_el_dia DESC, e.hora_inicio'
+    );
+    $consulta->bind_param('i', $usuario_id);
+    $consulta->execute();
+    return array_map('formatear_registro', $consulta->get_result()->fetch_all(MYSQLI_ASSOC));
 }
 
-// Un registro por su id, o null si no existe
-function obtener_registro(int $id): ?array
+// Un registro por su id, o null si no existe o es de otro usuario
+function obtener_registro(int $id, int $usuario_id): ?array
 {
     global $conexion;
-    $consulta = $conexion->prepare(CONSULTA_EVENTOS . ' WHERE e.id = ?');
-    $consulta->bind_param('i', $id);
+    $consulta = $conexion->prepare(CONSULTA_EVENTOS . ' WHERE e.id = ? AND e.usuario_id = ?');
+    $consulta->bind_param('ii', $id, $usuario_id);
     $consulta->execute();
     $fila = $consulta->get_result()->fetch_assoc();
     return $fila ? formatear_registro($fila) : null;
 }
 
-// Inserta un registro ya validado y lo devuelve tal como quedó en la base
-function guardar_registro(array $r): array
+// Inserta un registro ya validado a nombre del usuario y lo devuelve tal como quedó en la base
+function guardar_registro(array $r, int $usuario_id): array
 {
     global $conexion;
     $consulta = $conexion->prepare(
-        'INSERT INTO eventos (tipo, titulo, fecha, hora_inicio, hora_fin, todo_el_dia, lugar, persona,
+        'INSERT INTO eventos (usuario_id, tipo, titulo, fecha, hora_inicio, hora_fin, todo_el_dia, lugar, persona,
                               categoria_id, recordatorio, prioridad, notas)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, (SELECT id FROM categoria WHERE clave = ?), ?, ?, ?)'
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, (SELECT id FROM categoria WHERE clave = ?), ?, ?, ?)'
     );
     $todo_el_dia = (int) $r['todo_el_dia'];
     // s = texto, i = número entero (una letra por cada "?")
     $consulta->bind_param(
-        'sssssisssiss',
-        $r['tipo'], $r['titulo'], $r['fecha'], $r['hora_inicio'], $r['hora_fin'], $todo_el_dia,
+        'isssssisssiss',
+        $usuario_id, $r['tipo'], $r['titulo'], $r['fecha'], $r['hora_inicio'], $r['hora_fin'], $todo_el_dia,
         $r['lugar'], $r['persona'], $r['categoria'], $r['recordatorio'], $r['prioridad'], $r['notas']
     );
     $consulta->execute();
-    return obtener_registro($conexion->insert_id);
+    return obtener_registro($conexion->insert_id, $usuario_id);
 }
 
-// Actualiza un registro ya validado. Devuelve el registro actualizado, o null si no existe.
-function actualizar_registro(int $id, array $r): ?array
+// Actualiza un registro ya validado. Devuelve el registro actualizado, o null si no existe o es de otro usuario.
+function actualizar_registro(int $id, array $r, int $usuario_id): ?array
 {
     global $conexion;
-    if (obtener_registro($id) === null) {
+    if (obtener_registro($id, $usuario_id) === null) {
         return null;
     }
     $consulta = $conexion->prepare(
@@ -92,25 +98,66 @@ function actualizar_registro(int $id, array $r): ?array
             SET tipo = ?, titulo = ?, fecha = ?, hora_inicio = ?, hora_fin = ?, todo_el_dia = ?,
                 lugar = ?, persona = ?, categoria_id = (SELECT id FROM categoria WHERE clave = ?),
                 recordatorio = ?, prioridad = ?, notas = ?
-          WHERE id = ?'
+          WHERE id = ? AND usuario_id = ?'
     );
     $todo_el_dia = (int) $r['todo_el_dia'];
     $consulta->bind_param(
-        'sssssisssissi',
+        'sssssisssissii',
         $r['tipo'], $r['titulo'], $r['fecha'], $r['hora_inicio'], $r['hora_fin'], $todo_el_dia,
         $r['lugar'], $r['persona'], $r['categoria'], $r['recordatorio'], $r['prioridad'], $r['notas'],
-        $id
+        $id, $usuario_id
     );
     $consulta->execute();
-    return obtener_registro($id);
+    return obtener_registro($id, $usuario_id);
 }
 
-// Elimina un registro. Devuelve false si no existía.
-function eliminar_registro(int $id): bool
+// Elimina un registro del usuario. Devuelve false si no existía (o era de otro usuario).
+function eliminar_registro(int $id, int $usuario_id): bool
 {
     global $conexion;
-    $consulta = $conexion->prepare('DELETE FROM eventos WHERE id = ?');
-    $consulta->bind_param('i', $id);
+    $consulta = $conexion->prepare('DELETE FROM eventos WHERE id = ? AND usuario_id = ?');
+    $consulta->bind_param('ii', $id, $usuario_id);
     $consulta->execute();
     return $consulta->affected_rows > 0;
+}
+
+// ---------- Usuarios (P8) ----------
+
+// Crea una cuenta. Guarda el HASH de la contraseña, nunca la contraseña.
+// Si el correo ya existe, MySQL lanza una excepción con el código 1062 (valor repetido en un UNIQUE).
+function crear_usuario(string $nombre, string $correo, string $clave): void
+{
+    global $conexion;
+    $hash = password_hash($clave, PASSWORD_DEFAULT);
+    $consulta = $conexion->prepare('INSERT INTO usuarios (nombre, correo, clave_hash) VALUES (?, ?, ?)');
+    $consulta->bind_param('sss', $nombre, $correo, $hash);
+    $consulta->execute();
+}
+
+// La cuenta con ese correo (id, nombre, clave_hash), o null si no existe
+function buscar_usuario(string $correo): ?array
+{
+    global $conexion;
+    $consulta = $conexion->prepare('SELECT id, nombre, clave_hash FROM usuarios WHERE correo = ?');
+    $consulta->bind_param('s', $correo);
+    $consulta->execute();
+    $usuario = $consulta->get_result()->fetch_assoc();
+    return $usuario ?: null;
+}
+
+// Cuántos eventos tiene el usuario en cada categoría. Las categorías sin eventos salen con 0:
+// el filtro va en el ON del LEFT JOIN; en un WHERE, esas categorías desaparecerían.
+function resumen_por_categoria(int $usuario_id): array
+{
+    global $conexion;
+    $consulta = $conexion->prepare(
+        'SELECT c.nombre, COUNT(e.id) AS total
+           FROM categoria c
+           LEFT JOIN eventos e ON e.categoria_id = c.id AND e.usuario_id = ?
+          GROUP BY c.id, c.nombre
+          ORDER BY c.nombre'
+    );
+    $consulta->bind_param('i', $usuario_id);
+    $consulta->execute();
+    return $consulta->get_result()->fetch_all(MYSQLI_ASSOC);
 }

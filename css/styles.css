@@ -187,6 +187,16 @@ h1, h2, h3 {
   border-bottom-color: var(--color-acento);
 }
 
+/* Usuario con sesión (P8): el saludo es texto, no enlace; "Salir" sí es enlace */
+.barra__usuario { display: flex; align-items: center; gap: 1rem; }
+.barra__saludo {
+  color: var(--color-texto-secundario);
+  max-width: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ---------- Layout ---------- */
 .contenedor {
   display: grid;
@@ -203,6 +213,9 @@ h1, h2, h3 {
 
 /* Páginas de una sola columna (Eventos) */
 .contenedor--sencillo { grid-template-columns: minmax(0, 1fr); max-width: 980px; }
+
+/* Crear cuenta e iniciar sesión: una tarjeta angosta */
+.contenedor--acceso { grid-template-columns: minmax(0, 1fr); max-width: 480px; }
 
 /* Varias secciones apiladas dentro de una misma columna */
 .contenedor__columna { display: grid; gap: 1.5rem; align-content: start; min-width: 0; }
@@ -982,6 +995,9 @@ select.entrada {
   /* Barra en dos renglones: logo y tema arriba, los tres enlaces abajo */
   .barra { flex-wrap: wrap; row-gap: 0.625rem; }
   .barra .boton--icono { margin-left: auto; }
+  .barra__usuario { margin-left: auto; font-size: 0.9375rem; }
+  .barra__usuario + .boton--icono { margin-left: 0; }
+  .barra__saludo { max-width: 9rem; }
   .barra__nav {
     order: 3;
     width: 100%;

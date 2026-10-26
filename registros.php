@@ -1,5 +1,6 @@
 <?php
-// Devuelve todos los registros en JSON. Lo usan el calendario y la lista "Próximos".
+require __DIR__ . '/partes/sesion.php';   // sin sesión responde 401 en JSON
+// Devuelve en JSON los registros del usuario. Lo usan el calendario y la lista "Próximos".
 require __DIR__ . '/datos.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
@@ -10,4 +11,4 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
-echo json_encode(obtener_registros(), JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+echo json_encode(obtener_registros($usuarioId), JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
