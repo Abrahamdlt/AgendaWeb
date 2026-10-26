@@ -48,6 +48,7 @@ Hecha con HTML, CSS y JavaScript (sin frameworks), PHP y MySQL.
 | `registros.php` | Devuelve los registros en JSON (calendario y "Próximos") |
 | `eliminar.php` | Elimina un registro (desde el formulario de una tarjeta redirige a la lista; desde JavaScript responde JSON) |
 | `bd/instalar_agenda.sql` | Crea las tablas (`categoria`, `usuarios`, `eventos`) y las categorías |
+| `bd/migracion_p5.sql` | Práctica 5: categorías normalizadas (`categoria_id` con llave foránea) y columnas nuevas en `eventos` |
 | `bd/migracion_p8.sql` | Práctica 8: tabla `usuarios` y columna `usuario_id` en `eventos` (cada evento con dueño) |
 | `css/styles.css` | Estilos (sistema de marca "Pulso Neón", modo claro/oscuro) |
 | `js/` | Calendario, formulario, lista "Próximos" y cambio de tema |
