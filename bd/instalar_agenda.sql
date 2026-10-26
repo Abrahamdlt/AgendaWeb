@@ -1,7 +1,8 @@
 -- =========================================
 -- AgendaWeb · Instalación de la base de datos
 -- =========================================
--- Crea las tablas "categoria" y "eventos" con la estructura final y los datos iniciales.
+-- Crea las tablas "categoria", "usuarios" y "eventos" con la estructura final (incluye la
+-- Práctica 8: cada evento tiene dueño). Después, crea tu cuenta en registro.php.
 -- Compatible con MySQL 8 y MariaDB 10.11 (la que usa DOM Cloud).
 --
 -- Se puede ejecutar más de una vez: no borra tablas ni datos existentes
@@ -9,8 +10,7 @@
 --
 -- Cómo se ejecuta:  mysql -u USUARIO -p NOMBRE_DE_LA_BASE < bd/instalar_agenda.sql
 --
--- (bd/respaldo_agenda_antes.sql + bd/actualizar_agenda.sql documentan cómo se llegó
---  a esta estructura desde la base original; para instalar solo hace falta este archivo.)
+-- (bd/migracion_p8.sql muestra cómo se agregaron los usuarios a una base que ya existía.)
 
 CREATE TABLE IF NOT EXISTS categoria (
   id     INT NOT NULL AUTO_INCREMENT,
@@ -21,8 +21,17 @@ CREATE TABLE IF NOT EXISTS categoria (
   UNIQUE KEY uq_categoria_nombre (nombre)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS usuarios (
+  id         INT AUTO_INCREMENT PRIMARY KEY,
+  nombre     VARCHAR(80)  NOT NULL,
+  correo     VARCHAR(120) NOT NULL UNIQUE,
+  clave_hash VARCHAR(255) NOT NULL,
+  creado_en  DATETIME     DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS eventos (
   id             INT NOT NULL AUTO_INCREMENT,
+  usuario_id     INT NOT NULL,
   tipo           ENUM('evento', 'cita') NOT NULL DEFAULT 'evento',
   titulo         VARCHAR(120) NOT NULL,
   fecha          DATE NOT NULL,
@@ -40,6 +49,9 @@ CREATE TABLE IF NOT EXISTS eventos (
   actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   KEY idx_eventos_fecha (fecha),
+  CONSTRAINT fk_eventos_usuario
+    FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
+    ON DELETE CASCADE,
   CONSTRAINT fk_eventos_categoria
     FOREIGN KEY (categoria_id) REFERENCES categoria (id)
     ON UPDATE CASCADE ON DELETE RESTRICT,
@@ -59,11 +71,3 @@ INSERT IGNORE INTO categoria (id, clave, nombre) VALUES
   (2, 'personal', 'Personal'),
   (3, 'trabajo',  'Trabajo'),
   (4, 'salud',    'Salud');
-
-INSERT IGNORE INTO eventos (id, tipo, titulo, fecha, todo_el_dia, categoria_id, recordatorio, prioridad, notas) VALUES
-  (1, 'evento', 'Quiz de PHP',     '2026-09-26', TRUE, 1, 15, 'media', 'cuestionario de la U2'),
-  (2, 'evento', 'Practica de PHP', '2026-09-28', TRUE, 1, 15, 'media', 'Practica de PHP'),
-  (3, 'evento', 'Examen',          '2026-10-11', TRUE, 1, 15, 'media', 'Examen de programacion'),
-  (4, 'evento', 'Fiesta',          '2026-12-02', TRUE, 2, 15, 'media', 'Cumpleanios'),
-  (5, 'evento', 'Concierto',       '2027-01-15', TRUE, 2, 15, 'media', 'Concierto de Travis Scott'),
-  (7, 'evento', 'Aniversario',     '2027-07-23', TRUE, 2, 15, 'media', 'Aniversario');

@@ -25,7 +25,8 @@ Hecha con HTML, CSS y JavaScript (sin frameworks), PHP y MySQL.
 2. Copia `conexion.ejemplo.php` como `conexion.php` y pon tu usuario, contraseña y nombre
    de la base. `conexion.php` está en `.gitignore`: los datos de acceso nunca se suben a GitHub.
 
-3. Desde la carpeta del proyecto, levanta el servidor de PHP y abre http://localhost:8080
+3. Desde la carpeta del proyecto, levanta el servidor de PHP, abre http://localhost:8080/registro.php
+   y crea tu cuenta: cada usuario ve solo sus eventos
 
    ```bash
    php -S localhost:8080
@@ -46,8 +47,7 @@ Hecha con HTML, CSS y JavaScript (sin frameworks), PHP y MySQL.
 | `calendario.php` | Vista mensual, registros del día seleccionado y el evento más cercano |
 | `registros.php` | Devuelve los registros en JSON (calendario y "Próximos") |
 | `eliminar.php` | Elimina un registro (desde el formulario de una tarjeta redirige a la lista; desde JavaScript responde JSON) |
-| `bd/instalar_agenda.sql` | Crea las tablas y los datos iniciales |
-| `bd/respaldo_agenda_antes.sql`, `bd/actualizar_agenda.sql` | Base original y cómo se actualizó (historial) |
+| `bd/instalar_agenda.sql` | Crea las tablas (`categoria`, `usuarios`, `eventos`) y las categorías |
 | `bd/migracion_p8.sql` | Práctica 8: tabla `usuarios` y columna `usuario_id` en `eventos` (cada evento con dueño) |
 | `css/styles.css` | Estilos (sistema de marca "Pulso Neón", modo claro/oscuro) |
 | `js/` | Calendario, formulario, lista "Próximos" y cambio de tema |
