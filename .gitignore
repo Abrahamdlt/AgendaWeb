@@ -3,3 +3,7 @@ conexion.php
 
 # Configuración local del editor / asistente
 .claude/
+
+# Cuenta que envía los correos (usa correo.ejemplo.php como plantilla) y correos guardados en modo prueba
+correo.php
+correos/

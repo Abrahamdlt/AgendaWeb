@@ -25,8 +25,13 @@ Hecha con HTML, CSS y JavaScript (sin frameworks), PHP y MySQL.
 2. Copia `conexion.ejemplo.php` como `conexion.php` y pon tu usuario, contraseña y nombre
    de la base. `conexion.php` está en `.gitignore`: los datos de acceso nunca se suben a GitHub.
 
-3. Desde la carpeta del proyecto, levanta el servidor de PHP, abre http://localhost:8080/registro.php
-   y crea tu cuenta: cada usuario ve solo sus eventos
+3. Copia `correo.ejemplo.php` como `correo.php` (también está en `.gitignore`) y pon la cuenta que
+   enviará los correos de confirmación (con Gmail, una "contraseña de aplicación"). Si dejas
+   `'servidor' => ''`, en tu computadora los correos no se envían: se guardan en la carpeta `correos/`
+   y ahí puedes abrir el enlace.
+
+4. Desde la carpeta del proyecto, levanta el servidor de PHP, abre http://localhost:8080/registro.php
+   y crea tu cuenta. Confírmala con el enlace del correo y ya puedes entrar: cada usuario ve solo sus eventos
 
    ```bash
    php -S localhost:8080
@@ -39,6 +44,9 @@ Hecha con HTML, CSS y JavaScript (sin frameworks), PHP y MySQL.
 | `index.php` | Página principal **Eventos**: PHP genera una tarjeta por evento con `foreach` y `mostrarEvento()` (datos de la tabla `eventos`). Muestra el contador y el mensaje tras guardar, editar o eliminar (`index.php?ok=...`) |
 | `registrar.php` | Formulario para crear o editar un registro (`registrar.php?editar=ID`) y lista "Próximos". Valida en el servidor, vuelve a mostrar lo escrito si hay errores y usa PRG (redirige a `index.php?ok=...`) |
 | `registro.php`, `login.php`, `logout.php` | Crear cuenta (contraseña guardada con `password_hash`), iniciar sesión (`password_verify`) y cerrar sesión |
+| `verificar.php`, `reenviar.php` | Confirmar el correo con el enlace que llega al registrarse, y pedir un enlace nuevo |
+| `enviar_correo.php`, `partes/correo_verificacion.php` | Envía los correos por SMTP (sin librerías) y el diseño del correo "Confirma tu correo" |
+| `correo.ejemplo.php` | Plantilla de `correo.php` (cuenta que envía los correos, sin datos reales) |
 | `partes/sesion.php` | El guardia: va en la primera línea de cada página privada; sin sesión manda a `login.php` y define `$usuarioId` |
 | `validacion.php` | Campos obligatorios, formatos y listas blancas del formulario |
 | `ayudas.php` | Funciones pequeñas que comparten las páginas PHP |
@@ -50,5 +58,6 @@ Hecha con HTML, CSS y JavaScript (sin frameworks), PHP y MySQL.
 | `bd/instalar_agenda.sql` | Crea las tablas (`categoria`, `usuarios`, `eventos`) y las categorías |
 | `bd/migracion_p5.sql` | Práctica 5: categorías normalizadas (`categoria_id` con llave foránea) y columnas nuevas en `eventos` |
 | `bd/migracion_p8.sql` | Práctica 8: tabla `usuarios` y columna `usuario_id` en `eventos` (cada evento con dueño) |
+| `bd/migracion_verificacion.sql` | Columnas para confirmar el correo (`verificado`, `token_hash`, `token_enviado`) |
 | `css/styles.css` | Estilos (sistema de marca "Pulso Neón", modo claro/oscuro) |
 | `js/` | Calendario, formulario, lista "Próximos" y cambio de tema |

@@ -11,6 +11,7 @@ if (isset($_SESSION['uid'])) {   // ya tiene sesión: no necesita registrarse
 require __DIR__ . '/datos.php';        // conexion.php y crear_usuario()
 require __DIR__ . '/validacion.php';   // texto(): lee un campo como texto limpio
 require __DIR__ . '/ayudas.php';       // e(), recurso()
+require __DIR__ . '/enviar_correo.php'; // enviar_verificacion()
 
 $nombre = $correo = '';
 $errores = [];
@@ -35,8 +36,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($errores)) {
         try {
-            crear_usuario($nombre, $correo, $clave);   // se guarda el HASH, nunca la contraseña
-            header('Location: login.php?registrado=1', true, 303);
+            $id = crear_usuario($nombre, $correo, $clave);   // se guarda el HASH, nunca la contraseña
+            // La cuenta nace sin verificar: se manda el enlace secreto al correo que escribió
+            $enviado = enviar_verificacion($nombre, $correo, nuevo_token($id));
+            header('Location: login.php?' . ($enviado ? 'pendiente=1' : 'no_enviado=1'), true, 303);
             exit;
         } catch (mysqli_sql_exception $ex) {
             if ($ex->getCode() === 1062) {   // 1062 = valor repetido en un UNIQUE
@@ -106,7 +109,7 @@ function mensaje_error(array $errores, string $campo): string
   <main class="contenedor contenedor--acceso">
     <section class="tarjeta tarjeta--principal">
       <h1 class="titulo">Crear cuenta</h1>
-      <p class="subtitulo">Tu agenda, solo tuya: cada quien ve únicamente sus eventos.</p>
+      <p class="subtitulo">Tu agenda, solo tuya. Te enviaremos un enlace para confirmar tu correo.</p>
 
       <?php if (isset($errores['general'])): ?>
         <div class="aviso aviso--error" role="alert"><span><?= e($errores['general']) ?></span></div>

@@ -10,7 +10,8 @@
 --
 -- Cómo se ejecuta:  mysql -u USUARIO -p NOMBRE_DE_LA_BASE < bd/instalar_agenda.sql
 --
--- (bd/migracion_p8.sql muestra cómo se agregaron los usuarios a una base que ya existía.)
+-- (bd/migracion_p8.sql y bd/migracion_verificacion.sql muestran cómo se agregaron los usuarios
+--  y la verificación del correo a una base que ya existía.)
 
 CREATE TABLE IF NOT EXISTS categoria (
   id     INT NOT NULL AUTO_INCREMENT,
@@ -22,11 +23,14 @@ CREATE TABLE IF NOT EXISTS categoria (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS usuarios (
-  id         INT AUTO_INCREMENT PRIMARY KEY,
-  nombre     VARCHAR(80)  NOT NULL,
-  correo     VARCHAR(120) NOT NULL UNIQUE,
-  clave_hash VARCHAR(255) NOT NULL,
-  creado_en  DATETIME     DEFAULT CURRENT_TIMESTAMP
+  id            INT AUTO_INCREMENT PRIMARY KEY,
+  nombre        VARCHAR(80)  NOT NULL,
+  correo        VARCHAR(120) NOT NULL UNIQUE,
+  clave_hash    VARCHAR(255) NOT NULL,
+  verificado    BOOLEAN      NOT NULL DEFAULT FALSE COMMENT 'TRUE cuando abre el enlace del correo',
+  token_hash    CHAR(64)     NULL UNIQUE COMMENT 'SHA-256 del código del enlace',
+  token_enviado DATETIME     NULL COMMENT 'El enlace vence 24 horas después',
+  creado_en     DATETIME     DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS eventos (

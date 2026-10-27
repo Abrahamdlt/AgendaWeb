@@ -123,26 +123,73 @@ function eliminar_registro(int $id, int $usuario_id): bool
 
 // ---------- Usuarios (P8) ----------
 
-// Crea una cuenta. Guarda el HASH de la contraseña, nunca la contraseña.
+// Crea una cuenta SIN verificar y devuelve su id. Guarda el HASH de la contraseña, nunca la contraseña.
 // Si el correo ya existe, MySQL lanza una excepción con el código 1062 (valor repetido en un UNIQUE).
-function crear_usuario(string $nombre, string $correo, string $clave): void
+function crear_usuario(string $nombre, string $correo, string $clave): int
 {
     global $conexion;
+    // Si alguien registró este correo y nunca lo confirmó (enlace vencido), esa cuenta se borra:
+    // así nadie puede "apartar" el correo de otra persona.
+    $limpiar = $conexion->prepare(
+        'DELETE FROM usuarios
+          WHERE correo = ? AND verificado = FALSE
+            AND COALESCE(token_enviado, creado_en) < NOW() - INTERVAL 24 HOUR'
+    );
+    $limpiar->bind_param('s', $correo);
+    $limpiar->execute();
+
     $hash = password_hash($clave, PASSWORD_DEFAULT);
     $consulta = $conexion->prepare('INSERT INTO usuarios (nombre, correo, clave_hash) VALUES (?, ?, ?)');
     $consulta->bind_param('sss', $nombre, $correo, $hash);
     $consulta->execute();
+    return $conexion->insert_id;
 }
 
-// La cuenta con ese correo (id, nombre, clave_hash), o null si no existe
+// La cuenta con ese correo (id, nombre, clave_hash, verificado), o null si no existe
 function buscar_usuario(string $correo): ?array
 {
     global $conexion;
-    $consulta = $conexion->prepare('SELECT id, nombre, clave_hash FROM usuarios WHERE correo = ?');
+    $consulta = $conexion->prepare('SELECT id, nombre, clave_hash, verificado FROM usuarios WHERE correo = ?');
     $consulta->bind_param('s', $correo);
     $consulta->execute();
     $usuario = $consulta->get_result()->fetch_assoc();
     return $usuario ?: null;
+}
+
+// ---------- Verificación del correo ----------
+// El enlace lleva un código secreto al azar (el "token"). En la base solo se guarda su huella SHA-256:
+// si alguien leyera la tabla, no podría armar un enlace válido.
+
+// Crea un código nuevo para una cuenta sin verificar y lo devuelve (para ponerlo en el enlace).
+// Devuelve null si ya se envió uno hace menos de 1 minuto (evita usar la página para mandar spam).
+function nuevo_token(int $usuario_id): ?string
+{
+    global $conexion;
+    $token = bin2hex(random_bytes(32));   // 64 caracteres al azar, imposibles de adivinar
+    $huella = hash('sha256', $token);
+    $consulta = $conexion->prepare(
+        'UPDATE usuarios SET token_hash = ?, token_enviado = NOW()
+          WHERE id = ? AND verificado = FALSE
+            AND (token_enviado IS NULL OR token_enviado < NOW() - INTERVAL 1 MINUTE)'
+    );
+    $consulta->bind_param('si', $huella, $usuario_id);
+    $consulta->execute();
+    return $consulta->affected_rows === 1 ? $token : null;
+}
+
+// Marca como verificada la cuenta dueña del código, si no ha vencido (24 horas).
+// El código se borra al usarse: el mismo enlace no sirve dos veces.
+function verificar_token(string $token): bool
+{
+    global $conexion;
+    $huella = hash('sha256', $token);
+    $consulta = $conexion->prepare(
+        'UPDATE usuarios SET verificado = TRUE, token_hash = NULL, token_enviado = NULL
+          WHERE token_hash = ? AND verificado = FALSE AND token_enviado > NOW() - INTERVAL 24 HOUR'
+    );
+    $consulta->bind_param('s', $huella);
+    $consulta->execute();
+    return $consulta->affected_rows === 1;
 }
 
 // Cuántos eventos tiene el usuario en cada categoría. Las categorías sin eventos salen con 0:

@@ -13,6 +13,7 @@ require __DIR__ . '/ayudas.php';       // e(), recurso()
 
 $correo = '';
 $error  = '';
+$sinVerificar = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $correo = mb_strtolower(texto($_POST, 'correo'));
@@ -22,16 +23,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $usuario = buscar_usuario($correo);
 
     // 2 · ¿Existe y la contraseña coincide con su hash?
-    if ($usuario && password_verify($clave, $usuario['clave_hash'])) {
+    if (!$usuario || !password_verify($clave, $usuario['clave_hash'])) {
+        // Mismo mensaje en los dos casos: no revelamos si el correo existe
+        $error = 'Correo o contraseña incorrectos.';
+    } elseif (!$usuario['verificado']) {
+        // 3 · Contraseña correcta, pero aún no abre el enlace del correo: todavía no entra
+        $sinVerificar = true;
+    } else {
         session_regenerate_id(true);                 // id de sesión nuevo al entrar
         $_SESSION['uid']    = (int) $usuario['id'];
         $_SESSION['nombre'] = $usuario['nombre'];
         header('Location: index.php', true, 303);
         exit;
     }
-
-    // 3 · Mismo mensaje en los dos casos: no revelamos si el correo existe
-    $error = 'Correo o contraseña incorrectos.';
 }
 ?>
 <!DOCTYPE html>
@@ -81,8 +85,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <h1 class="titulo">Iniciar sesión</h1>
       <p class="subtitulo">Entra para ver y organizar tus eventos.</p>
 
-      <?php if (isset($_GET['registrado'])): ?>
-        <div class="aviso" role="status"><span>Cuenta creada. Ya puedes iniciar sesión.</span></div>
+      <?php if (isset($_GET['pendiente'])): ?>
+        <div class="aviso" role="status">
+          <span>Cuenta creada. Te enviamos un enlace a tu correo: ábrelo para activarla.</span>
+          <a class="enlace" href="reenviar.php">¿No te llegó?</a>
+        </div>
+      <?php endif; ?>
+      <?php if (isset($_GET['no_enviado'])): ?>
+        <div class="aviso aviso--error" role="alert">
+          <span>Tu cuenta se creó, pero no pudimos enviar el correo de confirmación.</span>
+          <a class="enlace" href="reenviar.php">Reenviar enlace</a>
+        </div>
+      <?php endif; ?>
+      <?php if (isset($_GET['verificado'])): ?>
+        <div class="aviso" role="status"><span>¡Correo confirmado! Ya puedes iniciar sesión.</span></div>
+      <?php endif; ?>
+      <?php if ($sinVerificar): ?>
+        <div class="aviso aviso--error" role="alert">
+          <span>Primero confirma tu correo con el enlace que te enviamos.</span>
+          <a class="enlace" href="reenviar.php">Reenviar enlace</a>
+        </div>
       <?php endif; ?>
       <?php if (isset($_GET['salio'])): ?>
         <div class="aviso" role="status"><span>Cerraste sesión. ¡Hasta pronto!</span></div>
