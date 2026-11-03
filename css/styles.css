@@ -813,6 +813,21 @@ select.entrada {
 }
 .eventos__cabecera .subtitulo { margin-bottom: 0; }
 
+/* Buscador (P9): texto ancho, categoría y botones en una fila */
+.buscador {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+}
+.buscador__acciones { display: flex; align-items: center; gap: 1rem; }
+.resultados {
+  margin: 0 0 1rem;
+  font-size: 0.9375rem;
+  color: var(--color-texto-secundario);
+}
+
 
 /* ---------- Calendario: registros del día seleccionado ---------- */
 .detalle-dia__cabecera {
@@ -953,7 +968,8 @@ select.entrada {
 
 /* Eventos */
 .eventos__cabecera,
-.eventos > .aviso { animation: aparecer 600ms var(--curva-apple) backwards; }
+.eventos > .aviso,
+.buscador { animation: aparecer 600ms var(--curva-apple) backwards; }
 .detalle-dia { animation: aparecer 700ms var(--curva-apple) 200ms backwards; }
 
 /* La tarjeta resaltada combina su entrada con el destello */
@@ -1007,6 +1023,8 @@ select.entrada {
   }
   .acciones { flex-direction: column-reverse; }
   .acciones .boton { width: 100%; }
+  .buscador { grid-template-columns: 1fr; }
+  .buscador__acciones .boton { flex: 1; }
   .selector, .selector--3 { max-width: none; }
 }
 

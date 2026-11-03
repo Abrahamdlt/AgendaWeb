@@ -6,6 +6,8 @@ require __DIR__ . '/partes/sesion.php';   // solo con sesión iniciada: define $
 // Práctica 4: las tarjetas las genera PHP. El HTML de UNA tarjeta se escribe una sola vez
 // en mostrarEvento(), y un foreach la repite con los datos de cada evento de la tabla "eventos".
 //
+// Práctica 9: buscador por texto y por categoría (index.php?q=...&categoria=...), solo entre tus eventos.
+//
 // También es el destino de la redirección PRG de registrar.php y eliminar.php:
 //   index.php?ok=creado&id=5    index.php?ok=actualizado&id=5    index.php?ok=eliminado
 require __DIR__ . '/datos.php';        // conexion.php ($conexion), obtener_registro() y resumen_por_categoria()
@@ -107,19 +109,46 @@ if ($ok === 'creado' || $ok === 'actualizado') {
     $aviso = ['texto' => 'Ese registro ya no existe; puede que ya se haya eliminado.', 'error' => true];
 }
 
+// ---------- P9 · Buscador: lo que escribió la persona ----------
+// Llega por GET (index.php?q=examen&categoria=escuela): la búsqueda queda en la URL,
+// así se puede recargar o guardar en marcadores. Buscar no cambia datos, por eso no es POST.
+$busqueda = mb_substr(texto($_GET, 'q'), 0, 100);       // texto libre, máximo 100 caracteres
+$categoria = texto($_GET, 'categoria');
+if (!array_key_exists($categoria, CATEGORIAS)) {        // lista blanca: lo que no sea una categoría se ignora
+    $categoria = '';
+}
+$filtrando = $busqueda !== '' || $categoria !== '';
+
 // ---------- Paso 7 · Los eventos, desde MySQL ----------
 // Los alias (AS) dejan las mismas claves que el arreglo de ejemplo de la práctica
 // (hora, categoria, descripcion), así mostrarEvento() y el foreach no cambian.
 // P8: la consulta lleva un dato del usuario, así que pasa de query() a prepare().
-$consulta = $conexion->prepare(
-    'SELECT e.id, e.titulo, e.fecha, e.hora_inicio AS hora, e.hora_fin, e.lugar,
-            c.clave AS categoria, e.prioridad, e.notas AS descripcion
-       FROM eventos e
-       JOIN categoria c ON c.id = e.categoria_id
-      WHERE e.usuario_id = ?
-      ORDER BY e.fecha, e.hora_inicio'
-);
-$consulta->bind_param('i', $usuarioId);
+// P9: se arma por partes. "Solo los míos" va SIEMPRE; cada filtro agrega su condición y su "?".
+$sql = 'SELECT e.id, e.titulo, e.fecha, e.hora_inicio AS hora, e.hora_fin, e.lugar,
+               c.clave AS categoria, e.prioridad, e.notas AS descripcion
+          FROM eventos e
+          JOIN categoria c ON c.id = e.categoria_id
+         WHERE e.usuario_id = ?';
+$tipos = 'i';
+$valores = [$usuarioId];
+
+if ($busqueda !== '') {
+    // LIKE '%examen%' = "contiene examen" en cualquier parte. Si la persona escribe % o _,
+    // se escapan (\% \_) para buscarlos como letras y no como comodines.
+    $patron = '%' . addcslashes($busqueda, '%_\\') . '%';
+    $sql .= ' AND (e.titulo LIKE ? OR e.notas LIKE ?)';
+    $tipos .= 'ss';
+    array_push($valores, $patron, $patron);
+}
+if ($categoria !== '') {
+    $sql .= ' AND c.clave = ?';
+    $tipos .= 's';
+    $valores[] = $categoria;
+}
+$sql .= ' ORDER BY e.fecha, e.hora_inicio';
+
+$consulta = $conexion->prepare($sql);
+$consulta->bind_param($tipos, ...$valores);   // "..." reparte el arreglo: un valor por cada "?"
 $consulta->execute();
 $eventos = $consulta->get_result()->fetch_all(MYSQLI_ASSOC);   // ← un arreglo de arreglos asociativos
 $consulta->close();
@@ -128,7 +157,8 @@ $consulta->close();
 $resumen = resumen_por_categoria($usuarioId);
 $conexion->close();
 
-$total = count($eventos);
+$total = count($eventos);                                   // con filtros: cuántos resultados hay
+$totalRegistrados = array_sum(array_column($resumen, 'total'));   // todos tus eventos
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -190,7 +220,7 @@ $total = count($eventos);
         <div>
           <h1 class="titulo" id="eventos-titulo">Eventos</h1>
           <!-- Paso 6 · El contador ya no está escrito a mano -->
-          <p class="subtitulo"><?= $total ?> <?= $total === 1 ? 'evento registrado' : 'eventos registrados' ?></p>
+          <p class="subtitulo"><?= $totalRegistrados ?> <?= $totalRegistrados === 1 ? 'evento registrado' : 'eventos registrados' ?></p>
           <p class="subtitulo">Por categoría:
             <?php foreach ($resumen as $i => $fila): ?><?= $i > 0 ? ' · ' : ' ' ?><?= e($fila['nombre']) ?> <?= (int) $fila['total'] ?><?php endforeach; ?>
           </p>
@@ -208,8 +238,45 @@ $total = count($eventos);
         </div>
       <?php endif; ?>
 
+      <!-- P9 · Buscador. Los campos conservan lo que se buscó (formulario "pegajoso") -->
+      <form class="buscador" action="index.php" method="get" role="search">
+        <div class="campo">
+          <label class="etiqueta" for="q">Buscar</label>
+          <input class="entrada" type="search" id="q" name="q" maxlength="100"
+                 value="<?= e($busqueda) ?>" placeholder="Título o notas">
+        </div>
+        <div class="campo">
+          <label class="etiqueta" for="filtro-categoria">Categoría</label>
+          <select class="entrada" id="filtro-categoria" name="categoria">
+            <option value="">Todas</option>
+            <?php foreach (CATEGORIAS as $valor => $texto): ?>
+              <option value="<?= e($valor) ?>"<?= $categoria === $valor ? ' selected' : '' ?>><?= e($texto) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="buscador__acciones">
+          <button type="submit" class="boton boton--secundario">Buscar</button>
+          <?php if ($filtrando): ?>
+            <a class="enlace" href="index.php">Limpiar</a>
+          <?php endif; ?>
+        </div>
+      </form>
+
+      <!-- P9 · Cuántos resultados hay (solo cuando se está buscando) -->
+      <?php if ($filtrando): ?>
+        <p class="resultados">
+          <?= $total ?> <?= $total === 1 ? 'resultado' : 'resultados' ?><?php if ($busqueda !== ''): ?>
+            para «<?= e($busqueda) ?>»<?php endif; ?><?php if ($categoria !== ''): ?>
+            en <?= e(CATEGORIAS[$categoria]) ?><?php endif; ?>
+        </p>
+      <?php endif; ?>
+
       <!-- Paso 6 · Lista O estado vacío, nunca los dos -->
-      <?php if (empty($eventos)): ?>
+      <?php if (empty($eventos) && $filtrando): ?>
+        <div class="tarjeta tarjeta--vacia">
+          <p>Ningún evento coincide con tu búsqueda. <a class="enlace enlace--activo" href="index.php">Ver todos</a></p>
+        </div>
+      <?php elseif (empty($eventos)): ?>
         <div class="tarjeta tarjeta--vacia">
           <p>Aún no tienes eventos registrados. <a class="enlace enlace--activo" href="registrar.php">Crea el primero</a></p>
         </div>

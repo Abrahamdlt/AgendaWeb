@@ -41,7 +41,7 @@ Hecha con HTML, CSS y JavaScript (sin frameworks), PHP y MySQL.
 
 | Archivo | Qué hace |
 |---|---|
-| `index.php` | Página principal **Eventos**: PHP genera una tarjeta por evento con `foreach` y `mostrarEvento()` (datos de la tabla `eventos`). Muestra el contador y el mensaje tras guardar, editar o eliminar (`index.php?ok=...`) |
+| `index.php` | Página principal **Eventos**: PHP genera una tarjeta por evento con `foreach` y `mostrarEvento()` (datos de la tabla `eventos`). Muestra el contador y el mensaje tras guardar, editar o eliminar (`index.php?ok=...`). Buscador por texto y categoría (`index.php?q=...&categoria=...`), solo entre tus eventos |
 | `registrar.php` | Formulario para crear o editar un registro (`registrar.php?editar=ID`) y lista "Próximos". Valida en el servidor, vuelve a mostrar lo escrito si hay errores y usa PRG (redirige a `index.php?ok=...`) |
 | `registro.php`, `login.php`, `logout.php` | Crear cuenta (contraseña guardada con `password_hash`), iniciar sesión (`password_verify`) y cerrar sesión |
 | `verificar.php`, `reenviar.php` | Confirmar el correo con el enlace que llega al registrarse, y pedir un enlace nuevo |
