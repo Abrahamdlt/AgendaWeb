@@ -325,6 +325,9 @@ fieldset .etiqueta { margin-bottom: 0.5rem; }
 
 .opcional { font-weight: 400; color: var(--color-texto-secundario); }
 
+/* Enlace de ayuda debajo de un campo ("¿Olvidaste tu contraseña?") */
+.campo__ayuda { align-self: flex-end; font-size: 0.875rem; margin-top: 0.125rem; }
+
 .entrada {
   width: 100%;
   font: inherit;

@@ -97,6 +97,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <a class="enlace" href="reenviar.php">Reenviar enlace</a>
         </div>
       <?php endif; ?>
+      <?php if (isset($_GET['restablecida'])): ?>
+        <div class="aviso" role="status"><span>Listo, tu contraseña cambió. Ya puedes iniciar sesión con la nueva.</span></div>
+      <?php endif; ?>
       <?php if (isset($_GET['verificado'])): ?>
         <div class="aviso" role="status"><span>¡Correo confirmado! Ya puedes iniciar sesión.</span></div>
       <?php endif; ?>
@@ -124,6 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <label class="etiqueta" for="clave">Contraseña</label>
           <input class="entrada" type="password" id="clave" name="clave"
                  autocomplete="current-password" required>
+          <a class="enlace campo__ayuda" href="olvide.php">¿Olvidaste tu contraseña?</a>
         </div>
 
         <div class="acciones">

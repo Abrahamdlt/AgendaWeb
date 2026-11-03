@@ -45,7 +45,8 @@ Hecha con HTML, CSS y JavaScript (sin frameworks), PHP y MySQL.
 | `registrar.php` | Formulario para crear o editar un registro (`registrar.php?editar=ID`) y lista "Próximos". Valida en el servidor, vuelve a mostrar lo escrito si hay errores y usa PRG (redirige a `index.php?ok=...`) |
 | `registro.php`, `login.php`, `logout.php` | Crear cuenta (contraseña guardada con `password_hash`), iniciar sesión (`password_verify`) y cerrar sesión |
 | `verificar.php`, `reenviar.php` | Confirmar el correo con el enlace que llega al registrarse, y pedir un enlace nuevo |
-| `enviar_correo.php`, `partes/correo_verificacion.php` | Envía los correos por SMTP (sin librerías) y el diseño del correo "Confirma tu correo" |
+| `olvide.php`, `restablecer.php` | ¿Olvidaste tu contraseña?: manda un enlace por correo (vence en 1 hora) para elegir una nueva |
+| `enviar_correo.php`, `partes/plantilla_correo.php` | Envía los correos por SMTP (sin librerías) y el diseño de los correos (confirmar correo y restablecer contraseña) |
 | `correo.ejemplo.php` | Plantilla de `correo.php` (cuenta que envía los correos, sin datos reales) |
 | `partes/sesion.php` | El guardia: va en la primera línea de cada página privada; sin sesión manda a `login.php` y define `$usuarioId` |
 | `validacion.php` | Campos obligatorios, formatos y listas blancas del formulario |
@@ -59,5 +60,6 @@ Hecha con HTML, CSS y JavaScript (sin frameworks), PHP y MySQL.
 | `bd/migracion_p5.sql` | Práctica 5: categorías normalizadas (`categoria_id` con llave foránea) y columnas nuevas en `eventos` |
 | `bd/migracion_p8.sql` | Práctica 8: tabla `usuarios` y columna `usuario_id` en `eventos` (cada evento con dueño) |
 | `bd/migracion_verificacion.sql` | Columnas para confirmar el correo (`verificado`, `token_hash`, `token_enviado`) |
+| `bd/migracion_restablecer.sql` | Columnas para la contraseña olvidada (`reset_hash`, `reset_enviado`) |
 | `css/styles.css` | Estilos (sistema de marca "Pulso Neón", modo claro/oscuro) |
 | `js/` | Calendario, formulario, lista "Próximos" y cambio de tema |

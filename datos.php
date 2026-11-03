@@ -192,6 +192,56 @@ function verificar_token(string $token): bool
     return $consulta->affected_rows === 1;
 }
 
+// ---------- ¿Olvidaste tu contraseña? ----------
+// Igual que la verificación: el enlace lleva un código al azar y la base solo guarda su huella.
+// Vence en 1 hora: es más delicado que confirmar un correo, porque permite cambiar la contraseña.
+
+// Crea un código para elegir contraseña nueva y lo devuelve, o null si ya se pidió uno hace menos de 1 minuto
+function nuevo_token_restablecer(int $usuario_id): ?string
+{
+    global $conexion;
+    $token = bin2hex(random_bytes(32));
+    $huella = hash('sha256', $token);
+    $consulta = $conexion->prepare(
+        'UPDATE usuarios SET reset_hash = ?, reset_enviado = NOW()
+          WHERE id = ? AND (reset_enviado IS NULL OR reset_enviado < NOW() - INTERVAL 1 MINUTE)'
+    );
+    $consulta->bind_param('si', $huella, $usuario_id);
+    $consulta->execute();
+    return $consulta->affected_rows === 1 ? $token : null;
+}
+
+// ¿El código existe y no ha vencido? (solo revisa; no lo gasta)
+function token_restablecer_valido(string $token): bool
+{
+    global $conexion;
+    $huella = hash('sha256', $token);
+    $consulta = $conexion->prepare(
+        'SELECT id FROM usuarios WHERE reset_hash = ? AND reset_enviado > NOW() - INTERVAL 1 HOUR'
+    );
+    $consulta->bind_param('s', $huella);
+    $consulta->execute();
+    return $consulta->get_result()->fetch_assoc() !== null;
+}
+
+// Guarda la contraseña nueva (su hash) de la cuenta dueña del código y gasta el código.
+// También deja la cuenta verificada: abrir el enlace prueba que el correo es suyo.
+function restablecer_clave(string $token, string $clave): bool
+{
+    global $conexion;
+    $huella = hash('sha256', $token);
+    $hash = password_hash($clave, PASSWORD_DEFAULT);
+    $consulta = $conexion->prepare(
+        'UPDATE usuarios
+            SET clave_hash = ?, reset_hash = NULL, reset_enviado = NULL,
+                verificado = TRUE, token_hash = NULL, token_enviado = NULL
+          WHERE reset_hash = ? AND reset_enviado > NOW() - INTERVAL 1 HOUR'
+    );
+    $consulta->bind_param('ss', $hash, $huella);
+    $consulta->execute();
+    return $consulta->affected_rows === 1;
+}
+
 // Cuántos eventos tiene el usuario en cada categoría. Las categorías sin eventos salen con 0:
 // el filtro va en el ON del LEFT JOIN; en un WHERE, esas categorías desaparecerían.
 function resumen_por_categoria(int $usuario_id): array

@@ -6,7 +6,7 @@
 // inicia sesión con la cuenta de correo.php y entrega el mensaje. Sin librerías externas.
 //
 // DOM Cloud bloquea el puerto 25, por eso se usa el 465 (o el 587) de un servicio como Gmail.
-require_once __DIR__ . '/partes/correo_verificacion.php';
+require_once __DIR__ . '/partes/plantilla_correo.php';
 
 // Los datos de correo.php, o null si no existe (entonces los correos se guardan en correos/)
 function config_correo(): ?array
@@ -15,15 +15,25 @@ function config_correo(): ?array
     return is_file($archivo) ? require $archivo : null;
 }
 
+// Dirección completa de una página del sitio (para los enlaces de los correos)
+function url_sitio(string $pagina): string
+{
+    $config = config_correo();
+    return rtrim($config['url_sitio'] ?? 'http://localhost:8080', '/') . '/' . $pagina;
+}
+
 // Manda el correo con el enlace para confirmar la cuenta. Devuelve false si no se pudo enviar.
 function enviar_verificacion(string $nombre, string $correo, string $token): bool
 {
-    $config = config_correo();
-    $sitio = rtrim($config['url_sitio'] ?? 'http://localhost:8080', '/');
-    $enlace = $sitio . '/verificar.php?token=' . $token;
-
-    [$html, $texto] = plantilla_verificacion($nombre, $enlace);
+    [$html, $texto] = plantilla_verificacion($nombre, url_sitio('verificar.php?token=' . $token));
     return enviar_correo($correo, 'Confirma tu correo · AgendaWeb', $html, $texto);
+}
+
+// Manda el correo con el enlace para elegir una contraseña nueva. Devuelve false si no se pudo enviar.
+function enviar_restablecer(string $nombre, string $correo, string $token): bool
+{
+    [$html, $texto] = plantilla_restablecer($nombre, url_sitio('restablecer.php?token=' . $token));
+    return enviar_correo($correo, 'Restablece tu contraseña · AgendaWeb', $html, $texto);
 }
 
 // Envía un correo con versión HTML y versión de texto (para programas que no muestran HTML)
