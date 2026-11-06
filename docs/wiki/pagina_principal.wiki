@@ -1,0 +1,31 @@
+'''AgendaWeb''' es una aplicación web para registrar y organizar eventos y citas: cada persona crea su cuenta, registra sus eventos, los ve en una lista o en un calendario mensual, los busca, los edita y los elimina. Cada quien ve '''solo sus propios eventos'''.
+
+Está hecha con HTML, CSS y JavaScript (sin frameworks), PHP 8 y MySQL, para la materia ''Desarrollo de Aplicaciones Web''.
+
+* Código: [https://github.com/Abrahamdlt/AgendaWeb Repositorio en GitHub]
+* Sitio publicado: [https://agendawebabraham.mnz.dom.my.id AgendaWeb en DOM Cloud]
+
+== Documentación ==
+* [[Instalación de AgendaWeb|Instalación]]: requisitos, cómo crear la base y cómo arrancar con <code>php -S</code>
+* [[Base de datos de AgendaWeb|Base de datos]]: las tablas y su código SQL
+* [[Páginas de AgendaWeb|Páginas]]: qué hace cada archivo del proyecto
+
+== Investigación ==
+* [[Investigación sobre wikis|¿Qué es un wiki?]]: origen, rasgos, Wikipedia, ejemplos y el lado oscuro, con fuentes
+
+== Funciones principales ==
+{| class="wikitable"
+! Función !! Desde qué práctica
+|-
+| Lista de eventos generada con PHP (<code>foreach</code> + <code>mostrarEvento()</code>) || P4
+|-
+| Categorías normalizadas con llave foránea || P5
+|-
+| Crear, editar y eliminar eventos (consultas preparadas, patrón PRG) || P6
+|-
+| Cuentas de usuario con <code>password_hash</code> y eventos por usuario || P8
+|-
+| Buscador por texto y categoría || P9
+|-
+| Verificación del correo y "¿Olvidaste tu contraseña?" || Extra
+|}

@@ -1,0 +1,68 @@
+Volver a la [[Página principal|portada]].
+
+Los archivos del proyecto se dividen en cuatro grupos según '''quién puede abrirlos''' y '''qué devuelven'''.
+
+== Públicas (sin iniciar sesión) ==
+{| class="wikitable"
+! Archivo !! Qué hace
+|-
+| <code>registro.php</code> || Crear cuenta. Guarda el hash de la contraseña (<code>password_hash</code>) y envía el correo de confirmación
+|-
+| <code>login.php</code> || Iniciar sesión con <code>password_verify</code>. Mismo mensaje si falla el correo o la contraseña
+|-
+| <code>verificar.php</code> || Llega el enlace del correo y confirma la cuenta
+|-
+| <code>reenviar.php</code> || Pide otro enlace de confirmación
+|-
+| <code>olvide.php</code> || "¿Olvidaste tu contraseña?": manda un enlace para elegir una nueva
+|-
+| <code>restablecer.php</code> || Formulario para la contraseña nueva (el enlace vence en 1 hora)
+|}
+
+== Privadas (solo con sesión) ==
+Su primera línea es <code><nowiki>require __DIR__ . '/partes/sesion.php';</nowiki></code> (el guardia): sin sesión mandan a <code>login.php</code>.
+{| class="wikitable"
+! Archivo !! Qué hace
+|-
+| <code>index.php</code> || Página principal: tus eventos en tarjetas, resumen por categoría y buscador por texto y categoría (<code>?q=...&categoria=...</code>)
+|-
+| <code>registrar.php</code> || Formulario para crear un evento, o editarlo con <code>registrar.php?editar=ID</code>
+|-
+| <code>calendario.php</code> || Vista mensual, los eventos del día elegido y el más cercano
+|}
+
+== Solo procesan (no muestran una página) ==
+Reciben una petición, hacen su trabajo y redirigen (patrón PRG) o responden JSON.
+{| class="wikitable"
+! Archivo !! Qué hace
+|-
+| <code>eliminar.php</code> || Borra un evento (solo por POST y solo si es tuyo). Desde una tarjeta redirige a <code>index.php?ok=eliminado</code>; desde JavaScript responde JSON
+|-
+| <code>logout.php</code> || Vacía y destruye la sesión, y redirige a <code>login.php?salio=1</code>
+|-
+| <code>registros.php</code> || Devuelve tus eventos en JSON para el calendario y la lista "Próximos"
+|}
+
+== Piezas internas (no se abren directamente) ==
+Las incluyen las demás páginas con <code>require</code>.
+{| class="wikitable"
+! Archivo !! Qué hace
+|-
+| <code>partes/sesion.php</code> || El guardia: revisa la sesión y define <code>$usuarioId</code> y <code>$usuarioNombre</code>
+|-
+| <code>datos.php</code> || Único archivo que habla con MySQL: todas las consultas preparadas
+|-
+| <code>validacion.php</code> || Campos obligatorios, formatos y listas blancas del formulario
+|-
+| <code>ayudas.php</code> || Funciones pequeñas: <code>e()</code> (escapa texto contra XSS), <code>recurso()</code>
+|-
+| <code>enviar_correo.php</code> || Envía correos por SMTP, sin librerías
+|-
+| <code>partes/plantilla_correo.php</code> || Diseño de los correos con la marca "Pulso Neón"
+|-
+| <code>conexion.php</code> / <code>correo.php</code> || Datos de acceso a MySQL y a la cuenta de correo ('''no se suben a GitHub'''; en el repositorio solo están sus plantillas <code>.ejemplo.php</code>)
+|-
+| <code>css/styles.css</code> || Estilos de la marca, modo claro y oscuro
+|-
+| <code>js/</code> || Calendario, formulario, lista "Próximos", confirmación al eliminar y cambio de tema
+|}

@@ -1,0 +1,40 @@
+Volver a la [[Página principal|portada]].
+
+== Requisitos ==
+* '''PHP 8.1''' o superior con la extensión <code>mysqli</code> (en <code>php.ini</code>, quitar el <code>;</code> de <code>extension=mysqli</code>)
+* '''MySQL 8''' o '''MariaDB 10.11''' (la que usa DOM Cloud)
+* Git, para descargar el código
+
+== 1. Descargar el código ==
+<pre>
+git clone https://github.com/Abrahamdlt/AgendaWeb.git
+cd AgendaWeb
+</pre>
+
+== 2. Crear la base de datos ==
+El archivo <code>bd/instalar_agenda.sql</code> crea las tablas <code>categoria</code>, <code>usuarios</code> y <code>eventos</code> y carga las categorías. Se puede ejecutar más de una vez sin borrar nada. Ver [[Base de datos de AgendaWeb|Base de datos]].
+<pre>
+mysql -u root -p -e "CREATE DATABASE agenda CHARACTER SET utf8mb4"
+mysql -u root -p agenda < bd/instalar_agenda.sql
+</pre>
+
+== 3. Datos de acceso (nunca a GitHub) ==
+# Copiar <code>conexion.ejemplo.php</code> como <code>conexion.php</code> y poner el usuario, la contraseña y el nombre de la base de MySQL.
+# Copiar <code>correo.ejemplo.php</code> como <code>correo.php</code> y poner la cuenta que envía los correos de confirmación (con Gmail, una ''contraseña de aplicación''). Si se deja <code><nowiki>'servidor' => ''</nowiki></code>, en la computadora los correos no se envían: se guardan en la carpeta <code>correos/</code> para abrir el enlace desde ahí.
+
+Los dos archivos están en <code>.gitignore</code>: '''los usuarios y contraseñas nunca se suben a GitHub'''.
+
+== 4. Arrancar ==
+Desde la carpeta del proyecto:
+<pre>
+php -S localhost:8080
+</pre>
+Abrir <code>http://localhost:8080/registro.php</code>, crear una cuenta, confirmarla con el enlace del correo e iniciar sesión.
+
+== Publicar en DOM Cloud ==
+El sitio se actualiza desde GitHub con una receta en el panel de DOM Cloud:
+<pre>
+commands:
+  - git pull
+</pre>
+Si un cambio necesita columnas nuevas en la base, se agregan con una línea <code>mysql</code> en la receta usando las variables de DOM Cloud (<code>$USERNAME</code>, <code>$DATABASE</code>), nunca escribiendo la contraseña.

@@ -61,5 +61,6 @@ Hecha con HTML, CSS y JavaScript (sin frameworks), PHP y MySQL.
 | `bd/migracion_p8.sql` | Práctica 8: tabla `usuarios` y columna `usuario_id` en `eventos` (cada evento con dueño) |
 | `bd/migracion_verificacion.sql` | Columnas para confirmar el correo (`verificado`, `token_hash`, `token_enviado`) |
 | `bd/migracion_restablecer.sql` | Columnas para la contraseña olvidada (`reset_hash`, `reset_enviado`) |
+| `docs/wiki/` | Documentación del proyecto en sintaxis de MediaWiki (las páginas del wiki de la P7-B) |
 | `css/styles.css` | Estilos (sistema de marca "Pulso Neón", modo claro/oscuro) |
 | `js/` | Calendario, formulario, lista "Próximos" y cambio de tema |

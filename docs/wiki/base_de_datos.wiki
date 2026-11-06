@@ -1,0 +1,118 @@
+Volver a la [[Página principal|portada]].
+
+La base se llama <code>agenda</code> (en DOM Cloud tiene otro nombre). Usa MySQL 8 o MariaDB, con <code>utf8mb4</code> para que acepte acentos y emojis. Se crea con <code>bd/instalar_agenda.sql</code> (ver [[Instalación de AgendaWeb|Instalación]]).
+
+== Tablas ==
+{| class="wikitable"
+! Tabla !! Para qué sirve !! Columnas principales
+|-
+| <code>categoria</code> || Las categorías de los eventos (Escolar, Personal, Trabajo, Salud) || <code>id</code>, <code>clave</code> (lo que envía el formulario), <code>nombre</code>
+|-
+| <code>usuarios</code> || Las cuentas || <code>id</code>, <code>nombre</code>, <code>correo</code> (único), <code>clave_hash</code> (nunca la contraseña), <code>verificado</code>, <code>token_hash</code>, <code>reset_hash</code>
+|-
+| <code>eventos</code> || Los eventos y citas de cada usuario || <code>id</code>, <code>usuario_id</code>, <code>tipo</code>, <code>titulo</code>, <code>fecha</code>, <code>hora_inicio</code>, <code>hora_fin</code>, <code>lugar</code>, <code>categoria_id</code>, <code>prioridad</code>, <code>notas</code>
+|}
+
+== Relaciones (llaves foráneas) ==
+{| class="wikitable"
+! Llave !! De → a !! Al borrar !! Por qué
+|-
+| <code>fk_eventos_usuario</code> || <code>eventos.usuario_id</code> → <code>usuarios.id</code> || <code>CASCADE</code> || Los eventos son de esa persona: si se borra la cuenta, se borran con ella
+|-
+| <code>fk_eventos_categoria</code> || <code>eventos.categoria_id</code> → <code>categoria.id</code> || <code>RESTRICT</code> || Una categoría la comparten muchos eventos: no se deja borrar mientras alguno la use
+|}
+
+== Seguridad ==
+* Las contraseñas se guardan como '''hash''' (<code>password_hash</code>); no se pueden leer ni "recuperar", solo cambiar.
+* Los códigos de los enlaces del correo también se guardan como huella SHA-256 (<code>token_hash</code>, <code>reset_hash</code>).
+* Todas las consultas de eventos llevan <code>AND usuario_id = ?</code>: cada quien ve, edita y borra solo lo suyo.
+
+== Historial (migraciones) ==
+{| class="wikitable"
+! Archivo !! Qué cambió
+|-
+| <code>bd/migracion_p5.sql</code> || Categorías normalizadas (tabla <code>categoria</code> + <code>categoria_id</code> con llave foránea)
+|-
+| <code>bd/migracion_p8.sql</code> || Tabla <code>usuarios</code> y columna <code>usuario_id</code> en <code>eventos</code>
+|-
+| <code>bd/migracion_verificacion.sql</code> || Columnas para confirmar el correo
+|-
+| <code>bd/migracion_restablecer.sql</code> || Columnas para "¿Olvidaste tu contraseña?"
+|}
+
+== Código SQL ==
+Así se crean las tablas (<code>bd/instalar_agenda.sql</code>):
+<pre>
+CREATE TABLE IF NOT EXISTS + INSERT IGNORE).
+--
+-- Cómo se ejecuta:  mysql -u USUARIO -p NOMBRE_DE_LA_BASE < bd/instalar_agenda.sql
+--
+-- (bd/migracion_p8.sql, bd/migracion_verificacion.sql y bd/migracion_restablecer.sql muestran
+--  cómo se agregaron los usuarios, la verificación del correo y el cambio de contraseña olvidada
+--  a una base que ya existía.)
+
+CREATE TABLE IF NOT EXISTS categoria (
+  id     INT NOT NULL AUTO_INCREMENT,
+  clave  VARCHAR(20) NOT NULL COMMENT 'Valor que envía el formulario',
+  nombre VARCHAR(50) NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_categoria_clave (clave),
+  UNIQUE KEY uq_categoria_nombre (nombre)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS usuarios (
+  id            INT AUTO_INCREMENT PRIMARY KEY,
+  nombre        VARCHAR(80)  NOT NULL,
+  correo        VARCHAR(120) NOT NULL UNIQUE,
+  clave_hash    VARCHAR(255) NOT NULL,
+  verificado    BOOLEAN      NOT NULL DEFAULT FALSE COMMENT 'TRUE cuando abre el enlace del correo',
+  token_hash    CHAR(64)     NULL UNIQUE COMMENT 'SHA-256 del código del enlace',
+  token_enviado DATETIME     NULL COMMENT 'El enlace vence 24 horas después',
+  reset_hash    CHAR(64)     NULL UNIQUE COMMENT 'SHA-256 del código para elegir contraseña nueva',
+  reset_enviado DATETIME     NULL COMMENT 'El enlace vence 1 hora después',
+  creado_en     DATETIME     DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS eventos (
+  id             INT NOT NULL AUTO_INCREMENT,
+  usuario_id     INT NOT NULL,
+  tipo           ENUM('evento', 'cita') NOT NULL DEFAULT 'evento',
+  titulo         VARCHAR(120) NOT NULL,
+  fecha          DATE NOT NULL,
+  hora_inicio    TIME NULL,
+  hora_fin       TIME NULL,
+  todo_el_dia    BOOLEAN NOT NULL DEFAULT FALSE,
+  lugar          VARCHAR(120) NULL,
+  persona        VARCHAR(80) NULL,
+  categoria_id   INT NOT NULL,
+  recordatorio   SMALLINT UNSIGNED NOT NULL DEFAULT 15
+                 COMMENT 'Minutos antes del inicio: 0 (sin recordatorio), 15, 60 o 1440',
+  prioridad      ENUM('baja', 'media', 'alta') NOT NULL DEFAULT 'media',
+  notas          TEXT NULL,
+  creado_en      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_eventos_fecha (fecha),
+  CONSTRAINT fk_eventos_usuario
+    FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
+    ON DELETE CASCADE,
+  CONSTRAINT fk_eventos_categoria
+    FOREIGN KEY (categoria_id) REFERENCES categoria (id)
+    ON UPDATE CASCADE ON DELETE RESTRICT,
+  CONSTRAINT chk_eventos_titulo CHECK (CHAR_LENGTH(TRIM(titulo)) > 0),
+  CONSTRAINT chk_eventos_recordatorio CHECK (recordatorio IN (0, 15, 60, 1440)),
+  CONSTRAINT chk_eventos_hora_fin CHECK (hora_fin IS NULL OR hora_fin > hora_inicio),
+  -- Todo el día = sin horas; si no es todo el día, la hora de inicio es obligatoria
+  CONSTRAINT chk_eventos_todo_el_dia CHECK (
+    (todo_el_dia = TRUE  AND hora_inicio IS NULL AND hora_fin IS NULL) OR
+    (todo_el_dia = FALSE AND hora_inicio IS NOT NULL)
+  )
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------- Datos iniciales ----------
+INSERT IGNORE INTO categoria (id, clave, nombre) VALUES
+  (1, 'escuela',  'Escolar'),
+  (2, 'personal', 'Personal'),
+  (3, 'trabajo',  'Trabajo'),
+  (4, 'salud',    'Salud');
+</pre>

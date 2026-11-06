@@ -1,0 +1,42 @@
+Volver a la [[Página principal|portada]]. Fuentes consultadas el 3 de noviembre de 2026.
+
+== 1. Origen ==
+El primer wiki fue '''WikiWikiWeb''', creado por '''Ward Cunningham''' y publicado el '''25 de marzo de 1995''' en su sitio c2.com.<ref name="c2">Cunningham, W. (2003). [https://c2.com/doc/etymology.html Correspondence on the Etymology of Wiki]. ''Referencia citada por el artículo "Wiki" de Wikipedia.''</ref><ref>History of Information. [https://historyofinformation.com/detail.php?id=1079 Ward Cunningham Establishes the First Wiki].</ref> "Wiki" viene del '''hawaiano''' y significa "rápido" ("wiki wiki" = muy rápido). Cunningham tomó el nombre del autobús ''Wiki Wiki'' del aeropuerto de Honolulu y eligió "wiki wiki web" porque le sonaba más divertido que "quick web".<ref name="c2" />
+
+== 2. Rasgos ==
+* '''Edición desde el navegador:''' cualquier lector con permiso pulsa "Editar", cambia el texto y guarda; no hace falta FTP ni programar.
+* '''Enlaces internos:''' las páginas se enlazan escribiendo su nombre (<code><nowiki>[[página]]</nowiki></code>), y un enlace a una página que no existe sirve para crearla.
+* '''Historial de versiones:''' se guarda cada cambio con autor y fecha; cualquier versión anterior se puede comparar o restaurar.
+* '''Colaboración:''' muchas personas escriben la misma página, y las discusiones van en una página aparte.
+
+== 3. Wikipedia ==
+* Nació el '''15 de enero de 2001''';<ref>Wikipedia. [https://en.wikipedia.org/wiki/Wikipedia:About Wikipedia:About].</ref> la versión en español empezó el '''20 de mayo de 2001'''.<ref name="acerca">Wikipedia en español. [https://es.wikipedia.org/wiki/Wikipedia:Acerca_de Wikipedia:Acerca de].</ref>
+* La Wikipedia en español tiene '''2 147 562 artículos''' (página oficial de estadísticas, consultada el 03/11/2026).<ref>Wikipedia en español. [https://es.wikipedia.org/wiki/Especial:Estadísticas Especial:Estadísticas] (consultado el 03/11/2026).</ref>
+* Su motor es '''MediaWiki''', el mismo de este wiki.<ref name="acerca" /><ref>[https://www.mediawiki.org/wiki/MediaWiki MediaWiki].</ref>
+* Su texto se publica bajo '''Creative Commons Atribución-CompartirIgual 4.0 (CC BY-SA 4.0)''', y además bajo la GFDL.<ref>Wikipedia en español. [https://es.wikipedia.org/wiki/Wikipedia:Derechos_de_autor Wikipedia:Derechos de autor].</ref>
+
+== 4. "Wikitodo": wikis que no son Wikipedia ==
+{| class="wikitable"
+! Tipo !! Wiki !! ¿Por qué un wiki?
+|-
+| Fans (videojuego) || '''Minecraft Wiki''': la escriben voluntarios de la comunidad, usa MediaWiki y tiene unas 18 000 páginas de contenido<ref>[https://minecraft.wiki/w/Minecraft_Wiki:About Minecraft Wiki: About].</ref> || El juego cambia en cada actualización y miles de jugadores pueden corregir al momento
+|-
+| Documentación técnica || '''Debian Wiki''': "un recurso principal de documentación" de Debian, editable por cualquiera, con MoinMoin<ref>[https://wiki.debian.org/DebianWiki Debian Wiki].</ref> || Quien resuelve un problema lo documenta directamente, y el historial muestra qué cambió
+|-
+| Empresa o equipo || '''Wikis de GitHub''': cada repositorio trae un wiki para su documentación, editable por quien tiene permiso de escritura<ref>GitHub Docs. [https://docs.github.com/en/communities/documenting-your-project-with-wikis/about-wikis About wikis].</ref> || La documentación vive junto al código y el equipo la mantiene sin depender de una sola persona
+|-
+| Personal ("segundo cerebro") || '''TiddlyWiki''': "un cuaderno web personal no lineal"<ref>[https://tiddlywiki.com/ TiddlyWiki].</ref> || Las ideas se enlazan entre sí, no en un orden fijo como en un documento
+|}
+
+== 5. El lado oscuro ==
+* '''Vandalismo:''' alguien borra o ensucia una página. Se combate con el historial (se revierte en un clic), listas de seguimiento, protección de páginas y bots como '''ClueBot NG''', que aprende de ediciones ya clasificadas: acierta en más del 90 % y, con su configuración actual, revierte cerca del 40 % del vandalismo casi sin falsos positivos.<ref>Wikipedia. [https://en.wikipedia.org/wiki/User:ClueBot_NG User:ClueBot NG].</ref>
+* '''Guerras de ediciones:''' dos personas revierten una y otra vez los cambios del otro. Wikipedia en español tiene la '''regla de las tres reversiones''': no más de 3 en un mismo artículo en 24 horas, y el desacuerdo se discute en la página de discusión.<ref>Wikipedia en español. [https://es.wikipedia.org/wiki/Wikipedia:Regla_de_las_tres_reversiones Regla de las tres reversiones].</ref>
+* '''Fiabilidad:''' como cualquiera puede editar, un artículo puede tener errores en un momento dado. La propia Wikipedia dice que es un "punto de partida", no un "punto final", y recomienda '''no citarla a ella sino la fuente original''' que cita, después de revisarla.<ref>Wikipedia. [https://en.wikipedia.org/wiki/Wikipedia:Academic_use Academic use].</ref> En trabajos académicos se cita la referencia porque es estable, tiene autor y se puede verificar; el artículo de Wikipedia puede cambiar mañana.
+
+== 6. Mi opinión ==
+* '''Wiki:''' conocimiento que escriben y corrigen muchas personas y que cambia seguido (documentación, apuntes de equipo, bases de conocimiento). Como este wiki.
+* '''WordPress (P7):''' publicar contenido con buen diseño sin programar (blog, sitio de un negocio, portafolio). Pocas personas publican y los demás leen.
+* '''Desarrollo a medida (AgendaWeb):''' cuando se necesita lógica propia que ningún gestor trae: cuentas, que cada usuario vea solo lo suyo, verificación por correo, búsqueda sobre los propios datos. Cuesta más, pero se controla todo.
+
+== Referencias ==
+<references />
