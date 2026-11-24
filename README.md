@@ -54,6 +54,7 @@ Hecha con HTML, CSS y JavaScript (sin frameworks), PHP y MySQL.
 | `datos.php` | Consultas preparadas a la base (leer, guardar, actualizar, eliminar) |
 | `conexion.ejemplo.php` | Plantilla de `conexion.php` (conexión a MySQL, sin datos reales) |
 | `calendario.php` | Vista mensual, registros del día seleccionado y el evento más cercano |
+| `api.php` | Práctica 10: tus eventos en JSON para otros programas (`api.php?q=...&categoria=...`). Con sesión responde 200; sin sesión, 401; con otro método que no sea GET, 405 |
 | `registros.php` | Devuelve los registros en JSON (calendario y "Próximos") |
 | `eliminar.php` | Elimina un registro (desde el formulario de una tarjeta redirige a la lista; desde JavaScript responde JSON) |
 | `bd/instalar_agenda.sql` | Crea las tablas (`categoria`, `usuarios`, `eventos`) y las categorías |
