@@ -192,6 +192,7 @@ $totalRegistrados = array_sum(array_column($resumen, 'total'));   // todos tus e
     <a href="index.php" class="marca">Agenda<span>Web</span></a>
     <nav class="barra__nav">
       <a href="index.php" class="enlace enlace--activo" aria-current="page">Eventos</a>
+      <a href="explorar.php" class="enlace">Explorar</a>
       <a href="calendario.php" class="enlace">Calendario</a>
       <a href="registrar.php" class="enlace">Nuevo registro</a>
     </nav>

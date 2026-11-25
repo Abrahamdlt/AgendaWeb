@@ -825,6 +825,7 @@ select.entrada {
   margin-bottom: 1.25rem;
 }
 .buscador__acciones { display: flex; align-items: center; gap: 1rem; }
+.buscador--en-vivo { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }   /* Explorar (P11): sin botón */
 .resultados {
   margin: 0 0 1rem;
   font-size: 0.9375rem;
