@@ -62,11 +62,13 @@ if ($q !== '') {
     $tipos .= 'ss';
     array_push($valores, $patron, $patron);
 }
-if (ctype_digit($categoria) && (int) $categoria > 0) {   // ?categoria=3 (el id)
+if (ctype_digit($categoria)) {                           // ?categoria=3 (el id); 0 = todas
     $categoria = (int) $categoria;
-    $condiciones[] = 'e.categoria_id = ?';
-    $tipos .= 'i';
-    $valores[] = $categoria;
+    if ($categoria > 0) {
+        $condiciones[] = 'e.categoria_id = ?';
+        $tipos .= 'i';
+        $valores[] = $categoria;
+    }
 } elseif ($categoria !== '') {                           // ?categoria=escuela (la clave, como en index.php)
     $condiciones[] = 'c.clave = ?';
     $tipos .= 's';
